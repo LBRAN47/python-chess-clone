@@ -23,6 +23,8 @@ class Piece():
 
     @abstractmethod
     def can_move(self, square: tuple[int]) -> bool:
+        if self.get_position() == square:
+            return False
         for coord in square:
             if coord < 1 or coord > 8:
                 return False
@@ -89,15 +91,19 @@ class Rook(Piece):
     def can_move(self, square: tuple[int]) -> bool:
         if not super().can_move(square):
             return False
-        return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])\
-                and self.get_position() != square
+        return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])
 
+class Queen(Piece):
 
-    
+    def __init__(self, position: tuple[int], color: bool):
+        super().__init__(position, color)
+        self.rook = Rook(position, color)
+        self.bishop = Bishop(position, color)
 
-
-            
-
-                
-
-
+    def can_move(self, square: tuple[int]) -> bool:
+        if not super().can_move(square):
+            return False
+        if self.rook.can_move(square) or self.bishop.can_move(square):
+            return True
+        return False
+ 
