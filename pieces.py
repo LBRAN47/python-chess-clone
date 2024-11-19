@@ -4,8 +4,12 @@ from abc import ABC, abstractmethod
 class Piece():
 
     def __init__(self, position: tuple[int], color: bool):
+        for coord in position:
+            if coord < 1 or coord > 8:
+                raise Exception(f"{self.__class__.__name__} must be in the board") 
         self._position = position
         self._color = color
+        
 
 
     def get_position(self) -> tuple[int]:
@@ -19,7 +23,9 @@ class Piece():
 
     @abstractmethod
     def can_move(self, square: tuple[int]) -> bool:
-        pass
+        for coord in square:
+            if coord < 1 or coord > 8:
+                return False
 
 class Pawn(Piece):
 
@@ -39,10 +45,7 @@ class Pawn(Piece):
         return self._has_moved
 
     def can_move(self, square: tuple[int]) -> bool:
-        for coord in square:
-            if coord < 1 or coord > 8:
-                return False
-
+        super().can_move(square)
         diff = (square[0] - self.get_position[0],  square[1] - self.get_position[1])
 
         #ensure pawn moves forward only one square
@@ -60,6 +63,19 @@ class Pawn(Piece):
         if diff[0] != -1 and diff[0] != 0 and diff[0] != 1:
             return False
         return True
+
+class Bishop(Piece):
+
+    def __init__(self, position: tuple[int], color: bool):
+        super().__init__(position, color)
+
+
+    def can_move(self, square: tuple[int]) -> bool:
+        super().can_move(square)
+        return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position[1])
+
+
+
 
             
 
