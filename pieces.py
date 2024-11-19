@@ -107,3 +107,26 @@ class Queen(Piece):
             return True
         return False
  
+class King(Piece):
+
+    def __init__(self, position: tuple[int], color: bool):
+        if color == WHITE and position != (5, 1):
+            raise Exception("King must start on the right starting square")
+        if color == BLACK and position != (5, 8):
+            raise Exception("King must start on the right starting square")
+
+        super().__init__(position, color)
+        self._has_moved = False
+
+    def has_moved(self) -> bool:
+        return self._has_moved
+
+    def can_move(self, square: tuple[int]) -> bool:
+        if not super().can_move(square):
+            return False
+        diff = (square[0] - self.get_position()[0], square[1] - self.get_position()[1])
+        #exception for castling
+        if not self.has_moved() and diff == (2, 0) or diff == (-2, 0):
+            return True
+        return not(abs(diff[0]) > 1 or abs(diff[1]) > 1)
+    
