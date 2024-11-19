@@ -74,7 +74,22 @@ class Bishop(Piece):
         super().can_move(square)
         return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position[1])
 
+class Rook(Piece):
 
+    def __init__(self, position: tuple[int], color: bool):
+        super().__init__(position, color)
+        self._has_moved = False
+
+    def has_moved(self) -> bool:
+        return self._has_moved
+
+    def can_move(self, square: tuple[int]) -> bool:
+        super().can_move(square)
+        return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])\
+                and self.get_position() != square
+
+
+    
 
 
             
