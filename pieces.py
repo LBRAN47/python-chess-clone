@@ -1,4 +1,4 @@
-import constants
+from constants import *
 from abc import ABC, abstractmethod
 
 class Piece():
@@ -26,12 +26,13 @@ class Piece():
         for coord in square:
             if coord < 1 or coord > 8:
                 return False
+        return True
 
 class Pawn(Piece):
 
     def __init__(self, position: tuple[int], color: bool):
 
-        super().__init__(self, position, color)
+        super().__init__(position, color)
         self._has_moved = False
         
         if self._color == WHITE:
@@ -45,9 +46,10 @@ class Pawn(Piece):
         return self._has_moved
 
     def can_move(self, square: tuple[int]) -> bool:
-        super().can_move(square)
-        diff = (square[0] - self.get_position[0],  square[1] - self.get_position[1])
-
+        if not super().can_move(square):
+            return False
+        diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
+        
         #ensure pawn moves forward only one square
         if self.get_color() == WHITE:
             if diff[1] != 1 and diff[1] != 2:
@@ -71,8 +73,9 @@ class Bishop(Piece):
 
 
     def can_move(self, square: tuple[int]) -> bool:
-        super().can_move(square)
-        return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position[1])
+        if not super().can_move(square):
+            return False
+        return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position()[1])
 
 class Rook(Piece):
 
@@ -84,7 +87,8 @@ class Rook(Piece):
         return self._has_moved
 
     def can_move(self, square: tuple[int]) -> bool:
-        super().can_move(square)
+        if not super().can_move(square):
+            return False
         return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])\
                 and self.get_position() != square
 
