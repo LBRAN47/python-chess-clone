@@ -22,16 +22,27 @@ class Piece():
         self._position = position
 
     @abstractmethod
-    def can_move(self, square: tuple[int]) -> bool:
+    def can_move(self, square: tuple[int], board) -> bool:
         if self.get_position() == square:
             return False
         for coord in square:
             if coord < 0  or coord > 7:
                 return False
+        col, row = square
+        if board[row][col] is not None and board[row][col].get_color() == self.get_color():
+            return False
         return True
+
+    def get_delta(self, diff: tuple[int]) -> tuple[int]:
+        dx = 0 if diff[0] == 0 else (1 if diff[0] > 0 else -1)
+        dy = 0 if diff[1] == 0 else (1 if diff[1] > 0 else -1)
+        return (dx, dy)
 
     def __str__(self) -> str:
         return self.__class__.__name__[0]
+
+    def move_piece(self, new: tuple[int]):
+        self._position = new
 
 class Pawn(Piece):
 
@@ -50,12 +61,14 @@ class Pawn(Piece):
     def has_moved(self) -> bool:
         return self._has_moved
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
+        col, row = square
+        position = self.get_position()
+        direction = self.get_delta(diff)
         
-        #ensure pawn moves forward only one square
         if self.get_color() == WHITE:
             if diff[1] != 1 and diff[1] != 2:
                 return False
@@ -66,9 +79,18 @@ class Pawn(Piece):
                 return False
             if diff[1] != -1 and self.has_moved():
                 return False
+        if diff[0] == 0:
+            while position != square:
+                position = (position[0] + direction[0], position[1] + direction[1])
+                if board[position[1]][position[0]] is not None:
+                    return False
 
-        if diff[0] != -1 and diff[0] != 0 and diff[0] != 1:
+        elif diff[0] == -1 or diff[0] == 1:
+            if board[row][col] is None or board[row][col].get_color() == self.get_color():
+                return False
+        else:
             return False
+
         return True
 
 class Bishop(Piece):
@@ -77,8 +99,8 @@ class Bishop(Piece):
         super().__init__(position, color)
 
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position()[1])
 
@@ -91,8 +113,8 @@ class Rook(Piece):
     def has_moved(self) -> bool:
         return self._has_moved
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])
 
@@ -103,8 +125,8 @@ class Queen(Piece):
         self.rook = Rook(position, color)
         self.bishop = Bishop(position, color)
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         if self.rook.can_move(square) or self.bishop.can_move(square):
             return True
@@ -124,8 +146,8 @@ class King(Piece):
     def has_moved(self) -> bool:
         return self._has_moved
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0], square[1] - self.get_position()[1])
         #exception for castling
@@ -139,8 +161,8 @@ class Knight(Piece):
     def __init__(self, position: tuple[int], color: bool):
         super().__init__(position, color)
 
-    def can_move(self, square: tuple[int]) -> bool:
-        if not super().can_move(square):
+    def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
+        if not super().can_move(square, board):
             return False
         diff = (abs(square[0] - self.get_position()[0]), abs(square[1] - self.get_position()[1]))
         return (diff[0] == 2 and diff[1] == 1) or (diff[0] == 1 and diff[1] == 2)
