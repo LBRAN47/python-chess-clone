@@ -1,5 +1,6 @@
 from pieces import Pawn, Bishop, Rook, Queen, King, Knight
 from constants import *
+from board import *
 
 
 pawn = Pawn((1, 1), WHITE)
@@ -63,3 +64,7 @@ assert knight.can_move((5, 6))
 assert knight.can_move((6, 5))
 assert knight.can_move((6, 3))
 assert knight.can_move((5, 2))
+
+print(pawn)
+board = Board(None)
+print(board)

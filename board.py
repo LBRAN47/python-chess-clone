@@ -2,8 +2,27 @@ from constants import *
 from pieces import *
 class Board():
 
-    def __init__(board: list[list[Piece]] | None):
+    def __init__(self, board: list[list[Piece]] | None):
         if board is not None:
+            if len(board) != 8:
+                raise Exception("board must have 8 rows")
+            white_king = False
+            black_king = False
+            for row in board:
+                if len(row) != 8:
+                    raise Exception("board must have 8 columns")
+                for square in row:
+                    if square is not None and isinstance(square, King):
+                        if square.get_color() == WHITE:
+                            if white_king:
+                                raise Exception("only one King per side")
+                            white_king = True
+                        else:
+                            if black_king:
+                                raise Exception("only one King per side")
+                            black_king = True
+            if not white_king or not black_king:
+                raise Exception("Each side must have one King")
             self._board = board
         else: #make regular board
             self._board = []
@@ -24,4 +43,24 @@ class Board():
                     row.append(Bishop((5, i), color))
                     row.append(Knight((6, i), color))
                     row.append(Rook((7, i), color))
-                    board.append(row)
+                    self._board.append(row)
+                else:
+                    for j in range(8):
+                        row.append(None)
+                    self._board.append(row)
+
+    def __str__(self) -> str:
+        ans = ""
+        for i in range(7, -1, -1):
+            row = self._board[i]
+            for square in row:
+                ans += "|"
+                if square is None:
+                    ans += " "
+                else:
+                    ans += str(square)
+            ans += "|\n"
+        return ans
+
+
+

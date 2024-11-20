@@ -30,6 +30,9 @@ class Piece():
                 return False
         return True
 
+    def __str__(self) -> str:
+        return self.__class__.__name__[0]
+
 class Pawn(Piece):
 
     def __init__(self, position: tuple[int], color: bool):
@@ -141,6 +144,9 @@ class Knight(Piece):
             return False
         diff = (abs(square[0] - self.get_position()[0]), abs(square[1] - self.get_position()[1]))
         return (diff[0] == 2 and diff[1] == 1) or (diff[0] == 1 and diff[1] == 2)
+    
+    def __str__(self) -> str:
+        return "N"
 
         
         
