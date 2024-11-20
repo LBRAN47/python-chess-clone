@@ -5,7 +5,7 @@ class Piece():
 
     def __init__(self, position: tuple[int], color: bool):
         for coord in position:
-            if coord < 1 or coord > 8:
+            if coord < 0  or coord > 7:
                 raise Exception(f"{self.__class__.__name__} must be in the board") 
         self._position = position
         self._color = color
@@ -26,7 +26,7 @@ class Piece():
         if self.get_position() == square:
             return False
         for coord in square:
-            if coord < 1 or coord > 8:
+            if coord < 0  or coord > 7:
                 return False
         return True
 
@@ -38,10 +38,10 @@ class Pawn(Piece):
         self._has_moved = False
         
         if self._color == WHITE:
-            if self._position[1] != 2:
+            if self._position[1] != 1:
                raise Exception("White Pawns must begin in row 2")
         else:
-            if self._position[1] != 7:
+            if self._position[1] != 6:
                raise Exception("Black Pawns must begin in row 7")
 
     def has_moved(self) -> bool:
@@ -110,10 +110,10 @@ class Queen(Piece):
 class King(Piece):
 
     def __init__(self, position: tuple[int], color: bool):
-        if color == WHITE and position != (5, 1):
-            self._has_moved == True
-        elif color == BLACK and position != (5, 8):
-            self._has_moved == True
+        if color == WHITE and position != (5, 0):
+            self._has_moved = True
+        elif color == BLACK and position != (5, 7):
+            self._has_moved = True
         else:
             self._has_moved = False
         super().__init__(position, color)
