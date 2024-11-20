@@ -1,4 +1,4 @@
-from pieces import Pawn, Bishop, Rook, Queen, King
+from pieces import Pawn, Bishop, Rook, Queen, King, Knight
 from constants import *
 
 
@@ -54,3 +54,12 @@ assert king3.can_move((7, 1))
 assert king3.can_move((3, 1))
 assert king2.can_move((7, 8))
 assert king2.can_move((3, 8))
+
+knight = Knight((4, 4), WHITE)
+
+assert knight.can_move((2, 5))
+assert knight.can_move((3, 6))
+assert knight.can_move((5, 6))
+assert knight.can_move((6, 5))
+assert knight.can_move((6, 3))
+assert knight.can_move((5, 2))
