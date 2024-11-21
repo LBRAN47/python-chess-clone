@@ -17,19 +17,19 @@ class Board():
                             if white_king:
                                 raise Exception("only one King per side")
                             white_king = True
-                            self._wking_position = square.get_position()
+                            self.wking_position = square.get_position()
                         else:
                             if black_king:
                                 raise Exception("only one King per side")
                             black_king = True
-                            self._bking_position = square.get_position()
+                            self.bking_position = square.get_position()
             if not white_king or not black_king:
                 raise Exception("Each side must have one King")
             self._board = board
         else: #make regular board
             self._board = self.construct_board()
-            self._wking_position = (5, 0)
-            self._bking_posiiton = (5, 7)
+            self.wking_position = (5, 0)
+            self.bking_position = (5, 7)
 
         self._turn = WHITE
 
@@ -85,19 +85,46 @@ class Board():
         return ans
 
     def in_check(self, player: bool) -> bool:
+        print(self.bking_position)
+        position = self.wking_position if player == WHITE else self.bking_position
+        for row in self.get_board():
+            for square in row:
+                if square is None:
+                    continue
+                if square.get_color() != player and square.can_move(position, self.get_board()):
+                    return True
+        return False
 
-        pass
     
     def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
         piece = self.get_board()[position[1]][position[0]]
         if piece is None:
             print("no piece at position")
             return
+        elif piece.get_color() != self.get_turn():
+            color = "White" if self._turn == WHITE else "Black"
+            print(f"tried to move {piece.__class__.__name__} at {position} but it is {color}'s turn")
+            return
         else:
             if piece.can_move(new, self.get_board()):
+                target = self._board[new[1]][new[0]]
                 self._board[position[1]][position[0]] = None
                 self._board[new[1]][new[0]] = piece
                 piece.move_piece(new)
+                if self.in_check(self._turn):
+                    piece.move_piece(position)
+                    self._board[position[1]][position[0]] = piece
+                    self._board[new[1]][new[0]] = target
+                    color = "White" if self._turn == WHITE else "Black"
+                    print(f"illegal move: {color} King in check")
+                    return
+                if isinstance(piece, King):
+                    if piece.get_color() == WHITE:
+                        self.wking_position = new
+                    else:
+                        self.bking_position = new
+                self.change_turn()
+                return
             else:
                 print(f"illegal move: {piece.__class__.__name__} at {position} to {new}")
                 return
