@@ -91,11 +91,13 @@ class Board():
     def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
         piece = self.get_board()[position[1]][position[0]]
         if piece is None:
-            raise Exception("no piece at position")
+            print("no piece at position")
+            return
         else:
             if piece.can_move(new, self.get_board()):
                 self._board[position[1]][position[0]] = None
                 self._board[new[1]][new[0]] = piece
                 piece.move_piece(new)
             else:
-                raise Exception("illegal move")
+                print(f"illegal move: {piece.__class__.__name__} at {position} to {new}")
+                return

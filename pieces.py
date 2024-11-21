@@ -102,7 +102,23 @@ class Bishop(Piece):
     def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
-        return abs(square[0] - self.get_position()[0]) == abs(square[1] - self.get_position()[1])
+        diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
+        col, row = square
+        position = self.get_position()
+        direction = self.get_delta(diff)
+        if  abs(diff[0]) != abs(diff[1]):
+            return False
+        while position != square:
+            position = (position[0] + direction[0], position[1] + direction[1])
+            if position == square:
+                continue
+            if board[position[1]][position[0]] is not None:
+                return False
+        if board[row][col] is not None and board[row][col].get_color() == self.get_color():
+            return False
+        return True
+
+
 
 class Rook(Piece):
 
