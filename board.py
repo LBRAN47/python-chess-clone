@@ -2,7 +2,7 @@ from constants import *
 from pieces import *
 class Board():
 
-    def __init__(self, board: list[list[Piece]] | None):
+    def __init__(self, board: list[list[Piece]] | None = None):
         if board is not None:
             if len(board) != 8:
                 raise Exception("board must have 8 rows")

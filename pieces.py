@@ -1,5 +1,6 @@
 from constants import *
 from abc import ABC, abstractmethod
+from typing import override
 
 class Piece():
 
@@ -132,7 +133,22 @@ class Rook(Piece):
     def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
-        return (self.get_position()[0] == square[0] or self.get_position()[1] == square[1])
+        diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
+        col, row = square
+        position = self.get_position()
+        direction = self.get_delta(diff)
+        if not (self.get_position()[0] == square[0] or self.get_position()[1] == square[1]):
+            return False
+        while position != square:
+            position = (position[0] + direction[0], position[1] + direction[1])
+            if position == square:
+                continue
+            if board[position[1]][position[0]] is not None:
+                return False
+        if board[row][col] is not None and board[row][col].get_color() == self.get_color():
+            return False
+        return True
+
 
 class Queen(Piece):
 
@@ -144,9 +160,14 @@ class Queen(Piece):
     def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
-        if self.rook.can_move(square) or self.bishop.can_move(square):
+        if self.rook.can_move(square, board) or self.bishop.can_move(square, board):
             return True
         return False
+
+    @override
+    def move_piece(self, new: tuple[int]):
+        self.rook._position = new
+        self.bishop._position = new
  
 class King(Piece):
 
