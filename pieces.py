@@ -172,9 +172,9 @@ class Queen(Piece):
 class King(Piece):
 
     def __init__(self, position: tuple[int], color: bool):
-        if color == WHITE and position != (5, 0):
+        if color == WHITE and position != (4, 0):
             self._has_moved = True
-        elif color == BLACK and position != (5, 7):
+        elif color == BLACK and position != (4, 7):
             self._has_moved = True
         else:
             self._has_moved = False
@@ -191,6 +191,11 @@ class King(Piece):
         if not self.has_moved() and diff == (2, 0) or diff == (-2, 0):
             return True
         return not(abs(diff[0]) > 1 or abs(diff[1]) > 1)
+    @override
+    def move_piece(self, new: tuple[int]) -> None:
+        self._position = new
+        self._has_moved = True
+
     
 class Knight(Piece):
 

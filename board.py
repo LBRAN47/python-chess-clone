@@ -28,8 +28,8 @@ class Board():
             self._board = board
         else: #make regular board
             self._board = self.construct_board()
-            self.wking_position = (5, 0)
-            self.bking_position = (5, 7)
+            self.wking_position = (4, 0)
+            self.bking_position = (4, 7)
 
         self._turn = WHITE
 
@@ -85,7 +85,6 @@ class Board():
         return ans
 
     def in_check(self, player: bool) -> bool:
-        print(self.bking_position)
         position = self.wking_position if player == WHITE else self.bking_position
         for row in self.get_board():
             for square in row:
@@ -94,6 +93,51 @@ class Board():
                 if square.get_color() != player and square.can_move(position, self.get_board()):
                     return True
         return False
+
+    def can_castle(self, piece: King, target: tuple[int]) -> bool:
+        position = piece.get_position()
+        origin = position
+        diff = (target[0] - position[0], target[1] - position[1])
+        direction = piece.get_delta(diff)
+        iteration = 1
+        while True:
+            position = (position[0] + direction[0], position[1] + direction[1])
+            square = self._board[position[1]][position[0]]
+            if square is not None and isinstance(square, Rook) and not square.has_moved() and\
+            square.get_color() == piece.get_color():
+                x_pos, y_pos  = square.get_position()
+                new_x = 3 if x_pos == 0 else 5
+                self._board[y_pos][x_pos] = None
+                self._board[y_pos][new_x] = square
+                square.set_position((new_x, y_pos))
+                break
+            if self._board[position[1]][position[0]] is not None:
+                return False
+            if iteration <= 2:
+                cur_pos = piece.get_position()
+                self._board[cur_pos[1]][cur_pos[0]] = None
+                self._board[position[1]][position[0]] = piece
+                piece.set_position(position)
+                if piece.get_color() == WHITE:
+                    self.wking_position = position
+                else:
+                    self.bking_position = position
+                if self.in_check(piece.get_color()):
+                    self._board[origin[1]][origin[0]] = piece
+                    self._board[position[1]][position[0]] = None
+                    piece.set_position(origin)
+                    return False
+
+            if  position[0] < 0 or position[0] > 7:
+                return False
+            iteration += 1
+        return True
+
+
+
+
+
+
 
     
     def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
@@ -107,6 +151,10 @@ class Board():
             return
         else:
             if piece.can_move(new, self.get_board()):
+                if isinstance(piece, King) and abs(position[0] - new[0]) == 2:
+                    if not self.can_castle(piece, new):
+                        print(f"cannot castle bozo")
+                        return False
                 target = self._board[new[1]][new[0]]
                 self._board[position[1]][position[0]] = None
                 self._board[new[1]][new[0]] = piece

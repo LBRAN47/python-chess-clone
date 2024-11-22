@@ -2,6 +2,8 @@ from pieces import Pawn, Bishop, Rook, Queen, King, Knight
 from constants import *
 from board import *
 
+import time
+
 board = Board()
 print(board)
 board.move_piece((1, 1), (1, 3))
@@ -37,3 +39,4 @@ while True:
     move = input("enter 4 numbers representing the move e.g. 1214\n")
     board.move_piece((int(move[0]),int(move[1])), (int(move[2]), int(move[3])))
     print(board)
+    time.sleep(0.1)
