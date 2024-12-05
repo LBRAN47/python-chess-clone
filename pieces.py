@@ -93,6 +93,25 @@ class Pawn(Piece):
             return False
 
         return True
+    
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        ans = []
+        pos = self.get_position()
+        if self.get_color() == WHITE:
+            directions = [(0, 1), (0, 2), (1, 1), (-1, 1)]
+        else:
+            directions =  [(0, -1), (0, -2), (1, -1), (-1, -1)]
+        moves = []
+        for direction in directions:
+            moves.append(tuple(a + b for a, b in zip(direction, pos)))
+
+        for move in moves:
+            if self.can_move(move, board):
+                ans.append(move)
+        return ans
+
+
+        
 
 class Bishop(Piece):
 
@@ -118,6 +137,22 @@ class Bishop(Piece):
         if board[row][col] is not None and board[row][col].get_color() == self.get_color():
             return False
         return True
+
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        ans = []
+        moves = []
+        pos = self.get_position()
+        mov = pos
+        for direction in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
+            mov = tuple(a + b for a, b in zip(direction, mov))
+            while mov[0] <= 7 and mov[0] >= 0 and mov[1] <= 7 and mov[1] >= 0:
+                moves.append(mov)
+                mov = tuple(a + b for a, b in zip(direction, mov))
+            mov = pos
+        for move in moves:
+            if self.can_move(move, board):
+                ans.append(move)
+        return ans
 
 
 
@@ -149,6 +184,21 @@ class Rook(Piece):
             return False
         return True
 
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        ans = []
+        moves = []
+        pos = self.get_position()
+        mov = pos
+        for direction in [(0, 1), (0, -1), (-1, 0), (1, 0)]:
+            mov = tuple(a + b for a, b in zip(direction, mov))
+            while mov[0] <= 7 and mov[0] >= 0 and mov[1] <= 7 and mov[1] >= 0:
+                moves.append(mov)
+                mov = tuple(a + b for a, b in zip(direction, mov))
+            mov = pos
+        for move in moves:
+            if self.can_move(move, board):
+                ans.append(move)
+        return ans
 
 class Queen(Piece):
 
@@ -168,6 +218,10 @@ class Queen(Piece):
     def move_piece(self, new: tuple[int]):
         self.rook._position = new
         self.bishop._position = new
+
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        return self.rook.get_valid_moves(board) + self.bishop.get_valid_moves(board)
+    
  
 class King(Piece):
 
@@ -196,6 +250,16 @@ class King(Piece):
         self._position = new
         self._has_moved = True
 
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        ans = []
+        for direction in [(0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0), (0, -1), (1, -1), (-1, -1)]:
+            pos = tuple(a + b for a, b in zip(self.get_position(), direction))
+            if self.can_move(pos, board):
+                ans.append(pos)
+        return ans
+
+
+
     
 class Knight(Piece):
 
@@ -209,6 +273,14 @@ class Knight(Piece):
         diff = (abs(square[0] - self.get_position()[0]), abs(square[1] - self.get_position()[1]))
         return (diff[0] == 2 and diff[1] == 1) or (diff[0] == 1 and diff[1] == 2)
     
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
+        ans = []
+        for direction in [(-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1)]:
+            pos = tuple(a + b for a, b in zip(self.get_position(), direction))
+            if self.can_move(pos, board):
+                ans.append(pos)
+        return ans
+
     def __str__(self) -> str:
         return "N"
 

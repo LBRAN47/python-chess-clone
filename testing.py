@@ -31,6 +31,13 @@ print(board)
 
 board = Board()
 
+my_board = board.get_board()
+for row in my_board:
+    for square in row:
+        if square is None:
+            continue
+        print(f"Piece: {square}, position: {square.get_position()}\nPossible Moves: {square.get_valid_moves(my_board)}")
+
 print("=====================")
 print("new game")
 print("=====================")

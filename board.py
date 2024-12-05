@@ -176,3 +176,9 @@ class Board():
             else:
                 print(f"illegal move: {piece.__class__.__name__} at {position} to {new}")
                 return
+
+    def in_checkmate(self) -> bool:
+        color = self.get_turn()
+        if not self.in_check(color):
+            return False
+
