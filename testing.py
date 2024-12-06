@@ -46,4 +46,9 @@ while True:
     move = input("enter 4 numbers representing the move e.g. 1214\n")
     board.move_piece((int(move[0]),int(move[1])), (int(move[2]), int(move[3])))
     print(board)
+    if board.in_checkmate():
+        color = "white" if board.get_turn() != WHITE else "black"
+        print(f"Game Over! {color} wins by checkmate!")
+        break
     time.sleep(0.1)
+    

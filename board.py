@@ -178,7 +178,43 @@ class Board():
                 return
 
     def in_checkmate(self) -> bool:
-        color = self.get_turn()
+        color =  self.get_turn()
         if not self.in_check(color):
             return False
+        board = self.get_board()
+        for row in board:
+            for square in row:
+                if square is None or square.get_color() != color:
+                    continue
+                for move in square.get_valid_moves(self._board):
+                    target = self._board[move[1]][move[0]]
+                    pos = square.get_position()
+                    self._board[pos[1]][pos[0]] = None
+                    self._board[move[1]][move[0]] = square
+                    square.move_piece(move)
+                    if isinstance(square, King):
+                        if color == WHITE:
+                            self.wking_position = move
+                        else:
+                            self.bking_position = move
+                    if self.in_check(color):
+                        square.move_piece(pos)
+                        self._board[move[1]][move[0]] = target
+                        self._board[pos[1]][pos[0]] = square
+                        if isinstance(square, King):
+                            if color == WHITE:
+                                self.wking_position = pos
+                            else:
+                                self.bking_position = pos
+
+                    else:
+                        print(move)
+                        return False
+        return True
+
+
+
+
+
+
 
