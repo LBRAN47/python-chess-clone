@@ -4,6 +4,27 @@ from board import *
 
 import time
 
+"""
+takes in the input of the user, which must be in the form "charintcharint" e.g. "d4e5".
+returns a list of two tuples, the coordinates of the piece to move, and the target square.
+"""
+def interpreter(text: str) -> list[tuple[int]]:
+    
+    if len(text) != 4:
+        print("text must be of length 4\n")
+        return
+    pos = text[0:2]
+    target = text[2:]
+    squares = []
+    for coord in [pos, target]:
+        if coord[0] not in COLUMNS.keys() or not coord[1].isdigit() or int(coord[1]) not in range(1, 9):
+            print(f"{coord} is not a letter followed by a number\n")
+            return
+        col = COLUMNS[coord[0]]
+        row = int(coord[1]) - 1
+        squares.append((col, row))
+    return squares
+
 board = Board()
 print(board)
 board.move_piece((1, 1), (1, 3))
@@ -38,13 +59,22 @@ for row in my_board:
             continue
         print(f"Piece: {square}, position: {square.get_position()}\nPossible Moves: {square.get_valid_moves(my_board)}")
 
+
+
+
+
 print("=====================")
 print("new game")
 print("=====================")
 
+
 while True:
-    move = input("enter 4 numbers representing the move e.g. 1214\n")
-    board.move_piece((int(move[0]),int(move[1])), (int(move[2]), int(move[3])))
+    move = input("enter 4 characters representing the move e.g. e2e4\n")
+    move = interpreter(move)
+    if move is None:
+        continue
+    pos, target = move
+    board.move_piece(pos, target)
     print(board)
     if board.in_checkmate():
         color = "white" if board.get_turn() != WHITE else "black"
