@@ -1,5 +1,19 @@
 from constants import *
 from pieces import *
+
+def coord_to_square(coord: tuple[int]) -> str | None:
+    if len(coord) != 2:
+        print("coord must be a coordinate\n")
+        return None
+    ans = ''
+    num = coord[0]
+    for let in COLUMN_LETTERS:
+        if COLUMNS[let] == num:
+            ans += let
+    ans += str(coord[1] + 1)
+    return ans
+
+
 class Board():
 
     def __init__(self, board: list[list[Piece]] | None = None):
@@ -134,11 +148,6 @@ class Board():
         return True
 
 
-
-
-
-
-
     
     def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
         piece = self.get_board()[position[1]][position[0]]
@@ -147,7 +156,7 @@ class Board():
             return
         elif piece.get_color() != self.get_turn():
             color = "White" if self._turn == WHITE else "Black"
-            print(f"tried to move {piece.__class__.__name__} at {position} but it is {color}'s turn")
+            print(f"tried to move {piece.__class__.__name__} at {coord_to_square(position)} but it is {color}'s turn")
             return
         else:
             if piece.can_move(new, self.get_board()):
@@ -174,7 +183,7 @@ class Board():
                 self.change_turn()
                 return
             else:
-                print(f"illegal move: {piece.__class__.__name__} at {position} to {new}")
+                print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
                 return
 
     def in_checkmate(self) -> bool:

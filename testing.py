@@ -18,7 +18,7 @@ def interpreter(text: str) -> list[tuple[int]]:
     squares = []
     for coord in [pos, target]:
         if coord[0] not in COLUMNS.keys() or not coord[1].isdigit() or int(coord[1]) not in range(1, 9):
-            print(f"{coord} is not a letter followed by a number\n")
+            print(f"{coord} is not a letter in range a-h followed by a number in range 1-8\n")
             return
         col = COLUMNS[coord[0]]
         row = int(coord[1]) - 1
