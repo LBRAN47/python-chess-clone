@@ -1,6 +1,7 @@
 from pieces import Pawn, Bishop, Rook, Queen, King, Knight
 from constants import *
 from board import *
+from view import *
 
 import time
 
@@ -68,6 +69,7 @@ print("new game")
 print("=====================")
 
 
+view = View(board.get_board())
 while True:
     move = input("enter 4 characters representing the move e.g. e2e4\n")
     move = interpreter(move)
@@ -80,5 +82,6 @@ while True:
         color = "white" if board.get_turn() != WHITE else "black"
         print(f"Game Over! {color} wins by checkmate!")
         break
+    view.update_display(board.get_board())
     time.sleep(0.1)
     

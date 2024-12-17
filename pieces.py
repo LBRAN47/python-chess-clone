@@ -42,6 +42,10 @@ class Piece():
     def __str__(self) -> str:
         return self.__class__.__name__[0]
 
+    def get_filename(self) -> str:
+        col = "B" if self.get_color() == BLACK else "W"
+        return str(self) + col + ".png"
+
     def move_piece(self, new: tuple[int]):
         self._position = new
 
@@ -283,6 +287,7 @@ class Knight(Piece):
 
     def __str__(self) -> str:
         return "N"
+
 
         
         
