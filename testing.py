@@ -3,6 +3,7 @@ from constants import *
 from board import *
 from view import *
 
+import pygame
 import time
 
 """
@@ -68,20 +69,44 @@ print("=====================")
 print("new game")
 print("=====================")
 
+class Controller():
 
-view = View(board.get_board())
-while True:
-    move = input("enter 4 characters representing the move e.g. e2e4\n")
-    move = interpreter(move)
-    if move is None:
-        continue
-    pos, target = move
-    board.move_piece(pos, target)
-    print(board)
-    if board.in_checkmate():
-        color = "white" if board.get_turn() != WHITE else "black"
-        print(f"Game Over! {color} wins by checkmate!")
-        break
-    view.update_display(board.get_board())
-    time.sleep(0.1)
+    def __init__(self, board: list[list[Piece]] | None = None):
+        self.window = pygame.display.set_mode((500, 500))
+        pygame.display.set_caption("CHESS")
+        self.window.fill((255, 200, 0))
+        self.board = Board(board)
+        self.view = View(self.board.get_board(), self.window)
+
+        self.terminal_game_loop()
+
+
+
+    def terminal_game_loop(self):
+        while True:
+            move = input("enter 4 characters representing the move e.g. e2e4\n")
+            move = interpreter(move)
+            if move is None:
+                continue
+            pos, target = move
+            self.board.move_piece(pos, target)
+            print(self.board)
+            if self.board.in_checkmate():
+                color = "white" if self.board.get_turn() != WHITE else "black"
+                print(f"Game Over! {color} wins by checkmate!")
+                break
+            self.view.update_display(self.board.get_board())
+            time.sleep(0.1)
     
+    def gui_game_loop(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        pass
+
+
+    def left_mouse_handler(self, event):
+        x, y = event.pos
+
+Controller()
