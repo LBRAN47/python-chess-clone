@@ -142,9 +142,11 @@ class Controller():
                 if event.type == pygame.MOUSEMOTION:
                     self.mouse_movement_handler(event)
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.is_piece_held = False
-                    self.piece_held = None
-                    self.piece_held_coords = None
+                    self.left_mouse_up_handler(event)
+                    if self.board.in_checkmate():
+                        color = "white" if self.board.get_turn() != WHITE else "black"
+                        print(f"Game Over! {color} wins by checkmate!")
+                        break
             
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
@@ -153,10 +155,22 @@ class Controller():
 
             pygame.display.update()
             time.sleep(0.0167)
+
+    def left_mouse_up_handler(self, event):
+        if not self.is_piece_held:
+            return
+        coords = self.coords_to_square(event.pos)
+        if coords is None:
+            return
+        row, col = coords
+        piece_row, piece_col = self.piece_held_coords
+        self.board.move_piece((piece_col, piece_row), (col, row))
+        self.is_piece_held = False
+        self.piece_held = None
+        self.piece_held_coords = None
+
     def mouse_movement_handler(self, event):
-        x, y = event.pos
-        self.cur_mouse_x = x
-        self.cur_mouse_y = y
+        self.cur_mouse_x, self.cur_mouse_y = event.pos
 
 
     def left_mouse_handler(self, event):
@@ -175,5 +189,5 @@ class Controller():
             
 
 
-
-Controller()
+if __name__ == "__main__":
+    Controller()
