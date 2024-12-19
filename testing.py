@@ -77,10 +77,11 @@ class Controller():
         pygame.display.set_caption("CHESS")
         self.window.fill((255, 200, 0))
         self.board = Board(board)
-        self.view = View(self.board.get_board(), self.window)
+        self.view = View(self.board, self.window)
 
         self.is_piece_held = False
         self.piece_held = None
+        self.piece_held_coords = None
 
         self.gui_game_loop()
 
@@ -133,7 +134,7 @@ class Controller():
     def gui_game_loop(self):
         while True:
             self.window.fill((0, 0, 0))
-            self.view.update_display(self.board.get_board())
+            self.view.update_display(self.board, self.piece_held_coords)
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -142,6 +143,8 @@ class Controller():
                     self.mouse_movement_handler(event)
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.is_piece_held = False
+                    self.piece_held = None
+                    self.piece_held_coords = None
             
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
@@ -167,13 +170,10 @@ class Controller():
         if self.view.board[row][col] is not None:
             self.piece_held = self.view.board[row][col]
             self.is_piece_held = True
+            self.piece_held_coords = coords
         return
             
-        
 
-        #convert position in x, y to square on the board
-        #if square is empty dont bother
-        #if square has a piece and it is your's, move it to your mouse
 
 
 Controller()
