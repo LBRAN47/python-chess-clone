@@ -84,6 +84,7 @@ class Controller():
         self.piece_held_coords = None
 
         self.gui_game_loop()
+        pygame.quit()
 
     """
     converts a set of x, y coordinates of a mouse event to coordinates on the chess board. Returns
@@ -129,6 +130,7 @@ class Controller():
                 print(f"Game Over! {color} wins by checkmate!")
                 break
             self.view.update_display(self.board.get_board())
+            self.view.board = self.board
             time.sleep(0.1)
     
     def gui_game_loop(self):
@@ -147,7 +149,7 @@ class Controller():
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
                         print(f"Game Over! {color} wins by checkmate!")
-                        break
+                        return
             
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
@@ -156,6 +158,8 @@ class Controller():
 
             pygame.display.update()
             time.sleep(0.0167)
+
+        return
 
     def left_mouse_up_handler(self, event):
         if not self.is_piece_held:

@@ -104,8 +104,7 @@ class Board():
             for square in row:
                 if square is None:
                     continue
-                if square.get_color() != player and square.can_move(position, self.get_board()):
-                    print(f"{square} at {square.get_position()} attacking king at {position}\n")
+                if square.get_color() != player and position in square.get_valid_moves(self.get_board()):
                     return True
         return False
 
@@ -164,18 +163,28 @@ class Board():
             return
         else:
             if piece.can_move(new, self.get_board()):
-                if isinstance(piece, King) and abs(position[0] - new[0]) == 2:
-                    if not self.can_castle(piece, new):
-                        print(f"cannot castle bozo")
-                        return False
+                if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and not self.can_castle(piece, new):
+                    print(f"cannot castle bozo")
+                    return
                 target = self._board[new[1]][new[0]]
+                piece.set_position(new)
                 self._board[position[1]][position[0]] = None
                 self._board[new[1]][new[0]] = piece
-                piece.move_piece(new)
+                if isinstance(piece, King):
+                    if piece.get_color() == WHITE:
+                        self.wking_position = new
+                    else:
+                        self.bking_position = new
                 if self.in_check(self._turn):
-                    piece.move_piece(position)
+                    piece.set_position(position)
+                    piece._has_moved = False
                     self._board[position[1]][position[0]] = piece
                     self._board[new[1]][new[0]] = target
+                    if isinstance(piece, King):
+                        if piece.get_color() == WHITE:
+                            self.wking_position = position
+                        else:
+                            self.bking_position = position
                     color = "White" if self._turn == WHITE else "Black"
                     print(f"illegal move: {color} King in check")
                     return
@@ -184,6 +193,7 @@ class Board():
                         self.wking_position = new
                     else:
                         self.bking_position = new
+                piece.move_piece(new)
                 self.change_turn()
                 return
             else:
@@ -193,9 +203,9 @@ class Board():
     def in_checkmate(self) -> bool:
         color =  self.get_turn()
         if not self.in_check(color):
-            print("must be in check to be in checkmate\n")
             return False
         board = self.get_board()
+        ans = True
         for row in board:
             for square in row:
                 if square is None or square.get_color() != color:
@@ -205,14 +215,15 @@ class Board():
                     pos = square.get_position()
                     self._board[pos[1]][pos[0]] = None
                     self._board[move[1]][move[0]] = square
-                    square.move_piece(move)
+                    square.set_position(move)
                     if isinstance(square, King):
                         if color == WHITE:
                             self.wking_position = move
                         else:
                             self.bking_position = move
-                    in_check = self.in_check(color)
-                    square.move_piece(pos)
+                    if not self.in_check(color):
+                        ans = False
+                    square.set_position(pos)
                     self._board[move[1]][move[0]] = target
                     self._board[pos[1]][pos[0]] = square
                     if isinstance(square, King):
@@ -220,11 +231,8 @@ class Board():
                             self.wking_position = pos
                         else:
                             self.bking_position = pos
-                    if not in_check:
-                        print(f"move {move} prevents checkmate\n")
-                        return False
 
-        return True
+        return ans
 
 
 
