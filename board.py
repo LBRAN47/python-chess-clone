@@ -105,6 +105,7 @@ class Board():
                 if square is None:
                     continue
                 if square.get_color() != player and square.can_move(position, self.get_board()):
+                    print(f"{square} at {square.get_position()} attacking king at {position}\n")
                     return True
         return False
 
@@ -126,6 +127,7 @@ class Board():
                 square.set_position((new_x, y_pos))
                 break
             if self._board[position[1]][position[0]] is not None:
+                print(f"cannot castle due to piece blocking at {position}\n")
                 return False
             if iteration <= 2:
                 cur_pos = piece.get_position()
@@ -140,9 +142,11 @@ class Board():
                     self._board[origin[1]][origin[0]] = piece
                     self._board[position[1]][position[0]] = None
                     piece.set_position(origin)
+                    print("got in check trying to move piece\n")
                     return False
 
             if  position[0] < 0 or position[0] > 7:
+                print("reached the end\n")
                 return False
             iteration += 1
         return True
@@ -189,6 +193,7 @@ class Board():
     def in_checkmate(self) -> bool:
         color =  self.get_turn()
         if not self.in_check(color):
+            print("must be in check to be in checkmate\n")
             return False
         board = self.get_board()
         for row in board:
@@ -206,19 +211,19 @@ class Board():
                             self.wking_position = move
                         else:
                             self.bking_position = move
-                    if self.in_check(color):
-                        square.move_piece(pos)
-                        self._board[move[1]][move[0]] = target
-                        self._board[pos[1]][pos[0]] = square
-                        if isinstance(square, King):
-                            if color == WHITE:
-                                self.wking_position = pos
-                            else:
-                                self.bking_position = pos
-
-                    else:
-                        print(move)
+                    in_check = self.in_check(color)
+                    square.move_piece(pos)
+                    self._board[move[1]][move[0]] = target
+                    self._board[pos[1]][pos[0]] = square
+                    if isinstance(square, King):
+                        if color == WHITE:
+                            self.wking_position = pos
+                        else:
+                            self.bking_position = pos
+                    if not in_check:
+                        print(f"move {move} prevents checkmate\n")
                         return False
+
         return True
 
 

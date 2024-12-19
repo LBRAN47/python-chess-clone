@@ -143,6 +143,7 @@ class Controller():
                     self.mouse_movement_handler(event)
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.left_mouse_up_handler(event)
+                    print(self.board)
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
                         print(f"Game Over! {color} wins by checkmate!")

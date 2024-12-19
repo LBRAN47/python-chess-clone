@@ -210,6 +210,7 @@ class Queen(Piece):
         super().__init__(position, color)
         self.rook = Rook(position, color)
         self.bishop = Bishop(position, color)
+        self._position = position
 
     def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
@@ -222,6 +223,7 @@ class Queen(Piece):
     def move_piece(self, new: tuple[int]):
         self.rook._position = new
         self.bishop._position = new
+        self._position = new
 
     def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
         return self.rook.get_valid_moves(board) + self.bishop.get_valid_moves(board)
