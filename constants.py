@@ -9,3 +9,5 @@ GREEN = (0, 191, 70)
 CREAM = (252, 255, 131)
 COLORS = [GREEN, CREAM]
 SQUARE_LENGTH = 62.2
+
+BOARD_POSITION = (0, 0) #top left corner of the board

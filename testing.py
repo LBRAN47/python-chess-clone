@@ -69,6 +69,7 @@ print("=====================")
 print("new game")
 print("=====================")
 
+
 class Controller():
 
     def __init__(self, board: list[list[Piece]] | None = None):
@@ -78,7 +79,38 @@ class Controller():
         self.board = Board(board)
         self.view = View(self.board.get_board(), self.window)
 
-        self.terminal_game_loop()
+        self.is_piece_held = False
+        self.piece_held = None
+
+        self.gui_game_loop()
+
+    """
+    converts a set of x, y coordinates of a mouse event to coordinates on the chess board. Returns
+    None if mouse event occurs somewhere other than the chess board.
+    """
+    def coords_to_square(self, coords: tuple[int]):
+        targ_x, targ_y = coords
+        x, y = BOARD_POSITION
+        targ_row_num = None
+        for row in range(7, -1, -1):
+            if targ_y > y and targ_y < (y + SQUARE_LENGTH):
+                targ_row_num = row
+                break
+            y += SQUARE_LENGTH
+        if targ_row_num is None:
+            print("y not in range :(")
+            return
+        targ_col_num = None
+        for col in range(8):
+            if targ_x > x and targ_x < (x + SQUARE_LENGTH):
+                targ_col_num = col
+                break
+            x += SQUARE_LENGTH
+        if targ_col_num is None:
+            print("x not in range :(")
+            return
+        return targ_row_num, targ_col_num
+
 
 
 
@@ -100,13 +132,48 @@ class Controller():
     
     def gui_game_loop(self):
         while True:
+            self.window.fill((0, 0, 0))
+            self.view.update_display(self.board.get_board())
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        pass
+                        self.left_mouse_handler(event)
+                if event.type == pygame.MOUSEMOTION:
+                    self.mouse_movement_handler(event)
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.is_piece_held = False
+            
+            if self.is_piece_held:
+                x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
+                y = self.cur_mouse_y - (SQUARE_LENGTH // 2)
+                self.window.blit(self.piece_held, (x, y))
+
+            pygame.display.update()
+            time.sleep(0.0167)
+    def mouse_movement_handler(self, event):
+        x, y = event.pos
+        self.cur_mouse_x = x
+        self.cur_mouse_y = y
 
 
     def left_mouse_handler(self, event):
+        if self.is_piece_held == True:
+            return
         x, y = event.pos
+        coords  = self.coords_to_square(event.pos)
+        if coords is None:
+            return
+        row, col = coords
+        if self.view.board[row][col] is not None:
+            self.piece_held = self.view.board[row][col]
+            self.is_piece_held = True
+        return
+            
+        
+
+        #convert position in x, y to square on the board
+        #if square is empty dont bother
+        #if square has a piece and it is your's, move it to your mouse
+
 
 Controller()
