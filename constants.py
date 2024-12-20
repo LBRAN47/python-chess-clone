@@ -8,6 +8,5 @@ COLUMNS = {"a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6, "h" : 
 GREEN = (0, 191, 70)
 CREAM = (252, 255, 131)
 COLORS = [GREEN, CREAM]
-SQUARE_LENGTH = 62.2
-
+SQUARE_LENGTH = 64
 BOARD_POSITION = (0, 0) #top left corner of the board

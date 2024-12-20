@@ -73,7 +73,7 @@ print("=====================")
 class Controller():
 
     def __init__(self, board: list[list[Piece]] | None = None):
-        self.window = pygame.display.set_mode((500, 500))
+        self.window = pygame.display.set_mode((8*SQUARE_LENGTH, 8*SQUARE_LENGTH))
         pygame.display.set_caption("CHESS")
         self.window.fill((255, 200, 0))
         self.board = Board(board)
