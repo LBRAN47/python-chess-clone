@@ -154,6 +154,7 @@ class Controller():
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
                 y = self.cur_mouse_y - (SQUARE_LENGTH // 2)
+                self.view.draw_valid_moves(self.board.get_valid_moves(self.piece_held_coords))
                 self.window.blit(self.piece_held, (x, y))
 
             pygame.display.update()
@@ -187,7 +188,8 @@ class Controller():
             return
         row, col = coords
         if self.view.board[row][col] is not None:
-            self.piece_held = self.view.board[row][col]
+            self.piece_held = self.view.board[row][col] #the image of the piece
+            self.piece_held_obj = self.board.get_board()[row][col] #the instance of the piece in board
             self.is_piece_held = True
             self.piece_held_coords = coords
         return

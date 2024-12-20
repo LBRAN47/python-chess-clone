@@ -46,5 +46,12 @@ class View():
             y += SQUARE_LENGTH
             counter += 1
 
-
+    def draw_valid_moves(self, moves: list[tuple[int]]):
+        if moves is None:
+            return
+        for move in moves:
+            move = (move[0], abs(move[1] - 7))
+            x = move[0]*SQUARE_LENGTH + SQUARE_LENGTH // 2
+            y = move[1]*SQUARE_LENGTH + SQUARE_LENGTH // 2
+            pygame.draw.circle(self.window, GREY, (x, y), VALID_MOVE_RADIUS)
 
