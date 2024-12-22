@@ -244,13 +244,6 @@ class Board():
         if piece is None:
             return
         ans = piece.get_valid_moves(self.get_board())
-        if isinstance(piece, King):
-            print((col + 2, row))
-            print((col -3, row))
-            if self.can_castle(piece, (col + 2, row)):
-                ans.append((col + 2, row))
-            if self.can_castle(piece, (col - 3, row)):
-                ans.append((col - 3, row))
         return ans
 
 
