@@ -251,6 +251,67 @@ class King(Piece):
         if not self.has_moved() and diff == (2, 0) or diff == (-2, 0):
             return True
         return not(abs(diff[0]) > 1 or abs(diff[1]) > 1)
+
+    def castle(self, rook: Rook,  board: Board):
+        #move rook
+        rook_x, rook_y = rook.get_position()
+        new_x = 3 if x_pos == 0 else 5
+        board._board[rook_y][rook_x] = None
+        board._board[rook_y][new_x] = rook
+        rook.set_position((new_x, rook_y))
+        
+        #move king
+        king_x, king_y = self.get_position()
+        new_x = 2 if x_pos == 0 else 6
+        board._board[king_y][king_x] = None
+        board._board[king_y][new_x] = self
+        self.move_piece(new_x, king_y))
+
+
+
+
+    def can_castle(self, target: tuple[int], board: Board) -> bool:
+        position = self.get_position()
+        origin = position
+        diff = (target[0] - position[0], target[1] - position[1])
+        direction = self.get_delta(diff)
+        iteration = 1
+        while True:
+            position = (position[0] + direction[0], position[1] + direction[1])
+            square = self._board[position[1]][position[0]]
+            if square is not None and isinstance(square, Rook) and not square.has_moved() and\
+            square.get_color() == self.get_color():
+                x_pos, y_pos  = square.get_position()
+                new_x = 3 if x_pos == 0 else 5
+                board._board[y_pos][x_pos] = None
+                board._board[y_pos][new_x] = square
+                square.set_position((new_x, y_pos))
+                break
+            if board._board[position[1]][position[0]] is not None:
+                print(f"cannot castle due to piece blocking at {position}\n")
+                return False
+            if iteration <= 2:
+                cur_pos = self.get_position()
+                board._board[cur_pos[1]][cur_pos[0]] = None
+                board._board[position[1]][position[0]] = self 
+                self.set_position(position)
+                if self.get_color() == WHITE:
+                    board.wking_position = position
+                else:
+                    board.bking_position = position
+                if board.in_check(self.get_color()):
+                    self._board[origin[1]][origin[0]] = self
+                    self._board[position[1]][position[0]] = None
+                    self.set_position(origin)
+                    print("got in check trying to move piece\n")
+                    return False
+
+            if  position[0] < 0 or position[0] > 7:
+                print("reached the end\n")
+                return False
+            iteration += 1
+        return True
+
     @override
     def move_piece(self, new: tuple[int]) -> None:
         self._position = new
