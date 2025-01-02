@@ -1,5 +1,6 @@
 from constants import *
 from pieces import *
+import copy
 
 def coord_to_square(coord: tuple[int]) -> str | None:
     if len(coord) != 2:
@@ -98,13 +99,12 @@ class Board():
             ans += "|\n"
         return ans
 
-    def in_check(self, player: bool) -> bool:
-        position = self.wking_position if player == WHITE else self.bking_position
-        for row in self.get_board():
+    def in_check(self, player: bool, board: list[list[Piece]], position: tuple[int]) -> bool:
+        for row in board:
             for square in row:
                 if square is None:
                     continue
-                if square.get_color() != player and position in square.get_valid_moves(self.get_board()):
+                if square.get_color() != player and position in square.get_valid_moves(board):
                     return True
         return False
  
@@ -115,8 +115,38 @@ class Board():
             self.wking_position = origin
         else:
             self.bking_position = origin
+
+    def castle(self, king: King, rook: Rook) -> None:
+        rook_pos = rook.get_position()
+        king_pos = king.get_position()
+        if rook_pos[0] == 0:
+            #long caslte
+            new_rook_pos = (rook_pos[0] + 3, rook_pos[1])
+            new_king_pos = (king_pos[0] - 2, king_pos[1])
+        elif rook_pos[0] == 7:
+            #short castle
+            new_rook_pos = (rook_pos[0] - 2, rook_pos[1])
+            new_king_pos = (king_pos[0] + 2, king_pos[1])
+        else:
+            raise Exception("rook is not on its starting square\n")
+            return
+        print(f"rook pos: {new_rook_pos}")
+        self.get_board()[rook_pos[1]][rook_pos[0]] = None
+        self.get_board()[king_pos[1]][king_pos[0]] = None
+        king.move_piece(new_king_pos)
+        rook.move_piece(new_rook_pos)
+        self.get_board()[new_rook_pos[1]][new_rook_pos[0]] = rook
+        self.get_board()[new_king_pos[1]][new_king_pos[0]] = king
+        if king.get_color() == WHITE:
+            self.wking_postiion = new_king_pos
+        else:
+            self.bking_position = new_king_pos
+        print(self)
+            
+            
  
     def can_castle(self, king: King, target: tuple[int]) -> bool:
+        board = Board(copy.deepcopy(self.get_board()))
         if king.has_moved():
             return False
         position = king.get_position()
@@ -127,35 +157,36 @@ class Board():
         while True:
          #move one square in direction of castle
             position = (position[0] + direction[0], position[1] + direction[1])
-            square = self.get_board()[position[1]][position[0]]
+            square = board.get_board()[position[1]][position[0]]
             if square is not None and isinstance(square, Rook) and not square.has_moved() and\
             square.get_color() == king.get_color(): #you've reached the end
-                self.reset_king(king, origin)
+                king.set_position(origin)
                 return True
             #check for pieces blocking
-            if self.get_board()[position[1]][position[0]] is not None:
-                self.reset_king(king, origin)
-                print(f"cannot castle due to piece blocking at {position}\n")
+            if board.get_board()[position[1]][position[0]] is not None:
+                #print(f"cannot castle due to piece blocking at {position}\n")
+                king.set_position(origin)
                 return False
             if iteration <= 2:
                 #move the king across one
                 cur_pos = king.get_position()
-                self.get_board()[cur_pos[1]][cur_pos[0]] = None
-                self.get_board()[position[1]][position[0]] = king
+                board.get_board()[cur_pos[1]][cur_pos[0]] = None
+                board.get_board()[position[1]][position[0]] = king
                 king.set_position(position)
                 if king.get_color() == WHITE:
-                    self.wking_position = position
+                    board.wking_position = position
                 else:
-                    self.bking_position = position
+                    board.bking_position = position
                  #see if its in check
-                if self.in_check(king.get_color()):
-                    self.get_board()[position[1]][position[0]] = None
-                    self.reset_king(king, origin)
-                    print("got in check trying to move piece\n")
+                if self.in_check(king.get_color(), board.get_board(), position):
+                    board.get_board()[position[1]][position[0]] = None
+                    king.set_position(origin)
+                    #print("got in check trying to move piece\n")
                     return False
             #shouldn't reach here but you might so check for out of bounds
             if  position[0] < 0 or position[0] > 7:
-                print("reached the end\n")
+                #print("reached the end\n")
+                king.set_position(origin)
                 return False
             iteration += 1
         return True
@@ -175,14 +206,10 @@ class Board():
             if piece.can_move(new, self.get_board()):
                 if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
                     if self.can_castle(piece, new):
-                        rook_x = 0 if position[0] - new[0] == 2 else 7
-                        rook_y = position[1]
-                        print((rook_x, rook_y))
-                        rook = self.get_board()[rook_y][rook_x]
-                        self.get_board()[rook_y][rook_x] = None
-                        rook_x += 3 if position[0] - new[0] == 2 else -2
-                        self.get_board()[rook_y][rook_x] = rook
-                        castled = True
+                        left_rook = self.get_board()[position[1]][0]
+                        right_rook = self.get_board()[position[1]][7]
+                        rook = left_rook if (position[0] - new[0]) == 2 else right_rook
+                        self.castle(piece, rook)
                     else:
                         print(f"cannot castle bozo")
                         return
@@ -195,7 +222,8 @@ class Board():
                         self.wking_position = new
                     else:
                         self.bking_position = new
-                if not castled and self.in_check(self._turn):
+                king_pos = self.wking_position if self._turn == WHITE else self.bking_position
+                if not castled and self.in_check(self._turn, self.get_board(), king_pos):
                     piece.set_position(position)
                     piece._has_moved = False
                     self._board[position[1]][position[0]] = piece
@@ -222,7 +250,8 @@ class Board():
 
     def in_checkmate(self) -> bool:
         color =  self.get_turn()
-        if not self.in_check(color):
+        king_pos = self.wking_position if color == WHITE else self.bking_position
+        if not self.in_check(color, self.get_board(), king_pos):
             return False
         board = self.get_board()
         ans = True
@@ -241,7 +270,8 @@ class Board():
                             self.wking_position = move
                         else:
                             self.bking_position = move
-                    if not self.in_check(color):
+                    king_pos = self.wking_position if color == WHITE else self.bking_position
+                    if not self.in_check(color, self.get_board(), king_pos):
                         ans = False
                     square.set_position(pos)
                     self._board[move[1]][move[0]] = target
@@ -262,12 +292,10 @@ class Board():
         if piece is None:
             return
         ans = piece.get_valid_moves(self.get_board())
-#        if isinstance(piece, King):
-#            print(square)
-#            for castle_move in [(square[1] + 2, square[0]), (square[1] - 2, square[0])]:
-#                if self.can_castle(piece, castle_move):
-#                    print("yay")
-#                    ans.append(castle_move)
+        if isinstance(piece, King):
+            for castle_move in [(square[1] + 2, square[0]), (square[1] - 2, square[0])]:
+                if self.can_castle(piece, castle_move):
+                    ans.append(castle_move)
         return ans
 
 
