@@ -129,6 +129,9 @@ class Controller():
                 color = "white" if self.board.get_turn() != WHITE else "black"
                 print(f"Game Over! {color} wins by checkmate!")
                 break
+            if self.board.in_stalemate():
+                print(f"Game Over! Stalemate!")
+                break
             self.view.update_display(self.board.get_board())
             self.view.board = self.board
             time.sleep(0.1)
@@ -149,6 +152,9 @@ class Controller():
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
                         print(f"Game Over! {color} wins by checkmate!")
+                        return
+                    if self.board.in_stalemate():
+                        print(f"Game Over! Stalemate!")
                         return
             
             if self.is_piece_held:

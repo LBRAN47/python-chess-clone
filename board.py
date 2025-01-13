@@ -247,14 +247,57 @@ class Board():
             else:
                 print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
                 return
+        return
 
+    """
+    checks if a move exists for which the current player is not in check. DOES NOT CHECK IF KING IS ALREADY IN CHECK.
+    Returns:
+        False if there exists a move for which the player is not in check
+        True if no such move exists
+    """
     def in_checkmate(self) -> bool:
         color =  self.get_turn()
         king_pos = self.wking_position if color == WHITE else self.bking_position
-        if not self.in_check(color, self.get_board(), king_pos):
-            return False
         board = self.get_board()
         ans = True
+        if not self.in_check(color, board, king_pos):
+            return False
+        for row in board:
+            for square in row:
+                if square is None or square.get_color() != color:
+                    continue
+                for move in square.get_valid_moves(self._board):
+                    target = self._board[move[1]][move[0]]
+                    pos = square.get_position()
+                    self._board[pos[1]][pos[0]] = None
+                    self._board[move[1]][move[0]] = square
+                    square.set_position(move)
+                    if isinstance(square, King):
+                        if color == WHITE:
+                            self.wking_position = move
+                        else:
+                            self.bking_position = move
+                    king_pos = self.wking_position if color == WHITE else self.bking_position
+                    if not self.in_check(color, self.get_board(), king_pos):
+                        ans = False
+                    square.set_position(pos)
+                    self._board[move[1]][move[0]] = target
+                    self._board[pos[1]][pos[0]] = square
+                    if isinstance(square, King):
+                        if color == WHITE:
+                            self.wking_position = pos
+                        else:
+                            self.bking_position = pos
+
+        return ans
+
+    def in_stalemate(self) -> bool:
+        color =  self.get_turn()
+        king_pos = self.wking_position if color == WHITE else self.bking_position
+        board = self.get_board()
+        ans = True
+        if self.in_check(color, board, king_pos):
+            return False
         for row in board:
             for square in row:
                 if square is None or square.get_color() != color:
