@@ -191,62 +191,77 @@ class Board():
             iteration += 1
         return True
 
-
-    def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
-        piece = self.get_board()[position[1]][position[0]]
+    """
+    Checks if the given move is valid.
+    Return:
+        True if move is valid
+        False if move is invalid
+    """
+    def can_move_piece(self, position: tuple[int], new: tuple[int]) -> bool:
+        board = Board(copy.deepcopy(self.get_board()))
+        board._turn = self.get_turn()
+        board.wking_position = self.wking_position
+        board.bking_position = self.bking_position
+        piece = board.get_board()[position[1]][position[0]]
         if piece is None:
             print("no piece at position")
-            return
+            return False
         elif piece.get_color() != self.get_turn():
-            color = "White" if self._turn == WHITE else "Black"
+            color = "White" if board.get_turn() == WHITE else "Black"
             print(f"tried to move {piece.__class__.__name__} at {coord_to_square(position)} but it is {color}'s turn")
-            return
+            return False
         else:
-            castled = False
-            if piece.can_move(new, self.get_board()):
+            if piece.can_move(new, board.get_board()):
                 if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
-                    if self.can_castle(piece, new):
-                        left_rook = self.get_board()[position[1]][0]
-                        right_rook = self.get_board()[position[1]][7]
-                        rook = left_rook if (position[0] - new[0]) == 2 else right_rook
-                        self.castle(piece, rook)
+                    if board.can_castle(piece, new):
+                        return True
                     else:
                         print(f"cannot castle bozo")
-                        return
-                target = self._board[new[1]][new[0]]
+                        return False
+                target = board.get_board()[new[1]][new[0]]
                 piece.set_position(new)
-                self._board[position[1]][position[0]] = None
-                self._board[new[1]][new[0]] = piece
+                board.get_board()[position[1]][position[0]] = None
+                board.get_board()[new[1]][new[0]] = piece
                 if isinstance(piece, King):
                     if piece.get_color() == WHITE:
-                        self.wking_position = new
+                        board.wking_position = new
                     else:
-                        self.bking_position = new
-                king_pos = self.wking_position if self._turn == WHITE else self.bking_position
-                if not castled and self.in_check(self._turn, self.get_board(), king_pos):
-                    piece.set_position(position)
-                    piece._has_moved = False
-                    self._board[position[1]][position[0]] = piece
-                    self._board[new[1]][new[0]] = target
-                    if isinstance(piece, King):
-                        if piece.get_color() == WHITE:
-                            self.wking_position = position
-                        else:
-                            self.bking_position = position
+                        board.bking_position = new
+                king_pos = board.wking_position if board.get_turn() == WHITE else board.bking_position
+                print(f"{board.get_turn()}, {board}, {king_pos}")
+                if board.in_check(board.get_turn(), board.get_board(), king_pos):
                     color = "White" if self._turn == WHITE else "Black"
                     print(f"illegal move: {color} King in check")
-                    return
-                if isinstance(piece, King):
-                    if piece.get_color() == WHITE:
-                        self.wking_position = new
-                    else:
-                        self.bking_position = new
-                piece.move_piece(new)
-                self.change_turn()
-                return
+                    return False
+                return True
             else:
                 print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
-                return
+                return False
+        return False
+
+    """
+    Moves the piece from its position to the new position (including castling). Assumes the move is valid
+    """
+    def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
+
+        piece = self.get_board()[position[1]][position[0]]
+        if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
+            left_rook = self.get_board()[position[1]][0]
+            right_rook = self.get_board()[position[1]][7]
+            rook = left_rook if (position[0] - new[0]) == 2 else right_rook
+            self.castle(piece, rook)
+            self.change_turn()
+            return
+        target = self._board[new[1]][new[0]]
+        piece.move_piece(new)
+        self._board[position[1]][position[0]] = None
+        self._board[new[1]][new[0]] = piece
+        if isinstance(piece, King):
+            if piece.get_color() == WHITE:
+                self.wking_position = new
+            else:
+                self.bking_position = new
+        self.change_turn()
         return
 
     """
@@ -331,10 +346,16 @@ class Board():
 
     def get_valid_moves(self, square: tuple[int]) -> list[tuple[int]] | None:
         row, col = square
+        square = col, row
         piece = self.get_board()[row][col]
         if piece is None:
             return
-        ans = piece.get_valid_moves(self.get_board())
+        ans = []
+        for move in piece.get_valid_moves(self.get_board()):
+            if self.can_move_piece(square, move):
+                ans.append(move)
+
+
         if isinstance(piece, King):
             for castle_move in [(square[1] + 2, square[0]), (square[1] - 2, square[0])]:
                 if self.can_castle(piece, castle_move):

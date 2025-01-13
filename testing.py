@@ -123,7 +123,9 @@ class Controller():
             if move is None:
                 continue
             pos, target = move
-            self.board.move_piece(pos, target)
+            if self.board.can_move_piece(pos, target):
+                print("yay")
+                self.board.move_piece(pos, target)
             print(self.board)
             if self.board.in_checkmate():
                 color = "white" if self.board.get_turn() != WHITE else "black"
@@ -176,7 +178,9 @@ class Controller():
             return
         row, col = coords
         piece_row, piece_col = self.piece_held_coords
-        self.board.move_piece((piece_col, piece_row), (col, row))
+        if self.board.can_move_piece((piece_col, piece_row), (col, row)):
+            print("yay")
+            self.board.move_piece((piece_col, piece_row), (col, row))
         self.is_piece_held = False
         self.piece_held = None
         self.piece_held_coords = None

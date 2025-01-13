@@ -97,6 +97,10 @@ class Pawn(Piece):
             return False
 
         return True
+
+    def move_piece(self, new: tuple[int]):
+        self._position = new
+        self._has_moved = True
     
     def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int]]:
         ans = []
