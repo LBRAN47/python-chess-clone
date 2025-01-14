@@ -154,6 +154,9 @@ class Board():
         diff = (target[0] - position[0], target[1] - position[1])
         direction = king.get_delta(diff)
         iteration = 1
+        #ensure we are not castling out of check
+        if self.in_check(king.get_color(), self.get_board(), position):
+            return False
         while True:
          #move one square in direction of castle
             position = (position[0] + direction[0], position[1] + direction[1])
