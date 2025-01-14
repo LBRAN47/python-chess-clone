@@ -18,7 +18,6 @@ class View():
 
     def update_display(self, board: Board, piece_selected: tuple[int] | None = None):
         self.draw_board(board, piece_selected)
-        pygame.display.flip()
 
     def draw_board(self, model: Board, piece_selected: tuple[int] | None = None) -> None:
         #the top left corner of the board is defined by BOARD_POSITION
@@ -34,7 +33,7 @@ class View():
                     piece_img = pygame.image.load(
                             os.path.join("PIECES", board[row][col].get_filename())).convert_alpha()
                     piece_img = pygame.transform.scale(piece_img, (SQUARE_LENGTH, SQUARE_LENGTH))
-                    if piece_selected is None or piece_selected != (row, col):
+                    if piece_selected is None or piece_selected != (col, row):
                         self.window.blit(piece_img, (x, y))
                     board_row.append(piece_img)
                 else:

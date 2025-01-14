@@ -73,7 +73,7 @@ print("=====================")
 class Controller():
 
     def __init__(self, board: list[list[Piece]] | None = None):
-        self.window = pygame.display.set_mode((8*SQUARE_LENGTH, 8*SQUARE_LENGTH))
+        self.window = pygame.display.set_mode((8*SQUARE_LENGTH, 8*SQUARE_LENGTH), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("CHESS")
         self.window.fill((255, 200, 0))
         self.board = Board(board)
@@ -111,7 +111,7 @@ class Controller():
         if targ_col_num is None:
             print("x not in range :(")
             return
-        return targ_row_num, targ_col_num
+        return targ_col_num, targ_row_num
 
 
 
@@ -150,7 +150,6 @@ class Controller():
                     self.mouse_movement_handler(event)
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.left_mouse_up_handler(event)
-                    print(self.board)
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
                         print(f"Game Over! {color} wins by checkmate!")
@@ -165,7 +164,7 @@ class Controller():
                 self.view.draw_valid_moves(self.board.get_valid_moves(self.piece_held_coords))
                 self.window.blit(self.piece_held, (x, y))
 
-            pygame.display.update()
+            pygame.display.flip()
             time.sleep(0.0167)
 
         return
@@ -176,8 +175,8 @@ class Controller():
         coords = self.coords_to_square(event.pos)
         if coords is None:
             return
-        row, col = coords
-        piece_row, piece_col = self.piece_held_coords
+        col, row = coords
+        piece_col, piece_row = self.piece_held_coords
         if self.board.can_move_piece((piece_col, piece_row), (col, row)):
             print("yay")
             self.board.move_piece((piece_col, piece_row), (col, row))
@@ -196,7 +195,7 @@ class Controller():
         coords  = self.coords_to_square(event.pos)
         if coords is None:
             return
-        row, col = coords
+        col, row = coords
         if self.view.board[row][col] is not None:
             self.piece_held = self.view.board[row][col] #the image of the piece
             self.piece_held_obj = self.board.get_board()[row][col] #the instance of the piece in board

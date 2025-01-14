@@ -228,7 +228,6 @@ class Board():
                     else:
                         board.bking_position = new
                 king_pos = board.wking_position if board.get_turn() == WHITE else board.bking_position
-                print(f"{board.get_turn()}, {board}, {king_pos}")
                 if board.in_check(board.get_turn(), board.get_board(), king_pos):
                     color = "White" if self._turn == WHITE else "Black"
                     print(f"illegal move: {color} King in check")
@@ -345,8 +344,7 @@ class Board():
 
 
     def get_valid_moves(self, square: tuple[int]) -> list[tuple[int]] | None:
-        row, col = square
-        square = col, row
+        col, row = square
         piece = self.get_board()[row][col]
         if piece is None:
             return
@@ -357,8 +355,8 @@ class Board():
 
 
         if isinstance(piece, King):
-            for castle_move in [(square[1] + 2, square[0]), (square[1] - 2, square[0])]:
-                if self.can_castle(piece, castle_move):
+            for castle_move in [(square[0] + 2, square[1]), (square[0] - 2, square[1])]:
+                if self.can_move_piece(square, castle_move):
                     ans.append(castle_move)
         return ans
 
