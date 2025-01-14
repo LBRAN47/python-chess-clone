@@ -207,11 +207,11 @@ class Board():
         board.bking_position = self.bking_position
         piece = board.get_board()[position[1]][position[0]]
         if piece is None:
-            print("no piece at position")
+            #print("no piece at position")
             return False
         elif piece.get_color() != self.get_turn():
             color = "White" if board.get_turn() == WHITE else "Black"
-            print(f"tried to move {piece.__class__.__name__} at {coord_to_square(position)} but it is {color}'s turn")
+            #print(f"tried to move {piece.__class__.__name__} at {coord_to_square(position)} but it is {color}'s turn")
             return False
         else:
             if piece.can_move(new, board.get_board()):
@@ -219,7 +219,7 @@ class Board():
                     if board.can_castle(piece, new):
                         return True
                     else:
-                        print(f"cannot castle bozo")
+                        #print(f"cannot castle bozo")
                         return False
                 target = board.get_board()[new[1]][new[0]]
                 piece.set_position(new)
@@ -233,11 +233,11 @@ class Board():
                 king_pos = board.wking_position if board.get_turn() == WHITE else board.bking_position
                 if board.in_check(board.get_turn(), board.get_board(), king_pos):
                     color = "White" if self._turn == WHITE else "Black"
-                    print(f"illegal move: {color} King in check")
+                    #print(f"illegal move: {color} King in check")
                     return False
                 return True
             else:
-                print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
+                #print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
                 return False
         return False
 
