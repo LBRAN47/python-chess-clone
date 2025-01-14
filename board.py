@@ -254,6 +254,8 @@ class Board():
             self.castle(piece, rook)
             self.change_turn()
             return
+        if isinstance(piece, Pawn) and (new[1] == 0 or new[1] == 7):
+            piece = Queen(position, piece.get_color())
         target = self._board[new[1]][new[0]]
         piece.move_piece(new)
         self._board[position[1]][position[0]] = None
