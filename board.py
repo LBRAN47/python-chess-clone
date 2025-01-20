@@ -242,10 +242,12 @@ class Board():
         return False
 
     """
-    Moves the piece from its position to the new position (including castling). Assumes the move is valid
+    Moves the piece from its position to the new position (including castling). Assumes the move is valid.
+    Returns 1 if the move is a pawn promotion, 0 otherwise
     """
-    def move_piece(self, position: tuple[int], new: tuple[int]) -> None:
+    def move_piece(self, position: tuple[int], new: tuple[int]) -> int:
 
+        flag = 0
         piece = self.get_board()[position[1]][position[0]]
         if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
             left_rook = self.get_board()[position[1]][0]
@@ -253,9 +255,10 @@ class Board():
             rook = left_rook if (position[0] - new[0]) == 2 else right_rook
             self.castle(piece, rook)
             self.change_turn()
-            return
+            return 0
         if isinstance(piece, Pawn) and (new[1] == 0 or new[1] == 7):
             piece = Queen(position, piece.get_color())
+            flag = 1
         target = self._board[new[1]][new[0]]
         piece.move_piece(new)
         self._board[position[1]][position[0]] = None
@@ -266,7 +269,7 @@ class Board():
             else:
                 self.bking_position = new
         self.change_turn()
-        return
+        return flag
 
     """
     checks if a move exists for which the current player is not in check. DOES NOT CHECK IF KING IS ALREADY IN CHECK.

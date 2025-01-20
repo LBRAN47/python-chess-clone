@@ -53,4 +53,22 @@ class View():
             x = move[0]*SQUARE_LENGTH + SQUARE_LENGTH // 2
             y = move[1]*SQUARE_LENGTH + SQUARE_LENGTH // 2
             pygame.draw.circle(self.window, GREY, (x, y), VALID_MOVE_RADIUS)
+    
+    def draw_promotion_options(self, pos: tuple[int], color: bool) -> None:
+
+        pieces = [Queen((0, 0), color), Rook((0, 0), color), Bishop((0, 0), color), Knight((0, 0), color)]
+
+        for i in range(4):
+            x = pos[0] + i*SELECT_BOX_LENGTH
+            y = pos[1]
+            pygame.draw.rect(
+                    self.window, DARK_GREY, pygame.Rect(x, y, SELECT_BOX_LENGTH, SELECT_BOX_LENGTH))
+            x = x + (SELECT_BOX_LENGTH - INNER_BOX_LENGTH)//2
+            y = y + (SELECT_BOX_LENGTH - INNER_BOX_LENGTH)//2
+            pygame.draw.rect(
+                    self.window, GREY, pygame.Rect(x, y, INNER_BOX_LENGTH, INNER_BOX_LENGTH))
+            piece_img = pygame.image.load(
+                    os.path.join("PIECES", pieces[i].get_filename())).convert_alpha()
+            piece_img = pygame.transform.scale(piece_img, (INNER_BOX_LENGTH, INNER_BOX_LENGTH))
+            self.window.blit(piece_img, (x, y))
 

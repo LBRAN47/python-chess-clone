@@ -83,6 +83,7 @@ class Controller():
         self.piece_held = None
         self.piece_held_coords = None
 
+        self.is_promotion = False
         self.gui_game_loop()
         pygame.quit()
 
@@ -112,7 +113,6 @@ class Controller():
             print("x not in range :(")
             return
         return targ_col_num, targ_row_num
-
 
 
 
@@ -162,6 +162,8 @@ class Controller():
                 y = self.cur_mouse_y - (SQUARE_LENGTH // 2)
                 self.view.draw_valid_moves(self.board.get_valid_moves(self.piece_held_coords))
                 self.window.blit(self.piece_held, (x, y))
+            if self.is_promotion:
+                self.view.draw_promotion_options((self.promotion_coords), self.board.get_turn())
 
             pygame.display.flip()
             time.sleep(0.0167)
@@ -177,10 +179,15 @@ class Controller():
         col, row = coords
         piece_col, piece_row = self.piece_held_coords
         if self.board.can_move_piece((piece_col, piece_row), (col, row)):
-            self.board.move_piece((piece_col, piece_row), (col, row))
+            flag = self.board.move_piece((piece_col, piece_row), (col, row))
+            if flag: #promotion
+                self.is_promotion = True
+                self.promotion_coords = event.pos
+
         self.is_piece_held = False
         self.piece_held = None
         self.piece_held_coords = None
+        print(self.board)
 
     def mouse_movement_handler(self, event):
         self.cur_mouse_x, self.cur_mouse_y = event.pos
