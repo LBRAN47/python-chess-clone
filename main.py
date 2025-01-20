@@ -160,6 +160,8 @@ class Controller():
             self.window.fill((0, 0, 0))
             self.view.update_display(self.board, self.piece_held_coords)
             for event in pygame.event.get():
+                if event.type == pygame.WINDOWCLOSE:
+                    return
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.left_mouse_handler(event)
