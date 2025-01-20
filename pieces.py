@@ -1,7 +1,8 @@
-from constants import *
 from abc import ABC, abstractmethod
 from typing import override
 
+BLACK = False
+WHITE = True
 class Piece():
 
     def __init__(self, position: tuple[int], color: bool):

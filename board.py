@@ -247,7 +247,6 @@ class Board():
     """
     def move_piece(self, position: tuple[int], new: tuple[int]) -> int:
 
-        flag = 0
         piece = self.get_board()[position[1]][position[0]]
         if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
             left_rook = self.get_board()[position[1]][0]
@@ -257,9 +256,7 @@ class Board():
             self.change_turn()
             return 0
         if isinstance(piece, Pawn) and (new[1] == 0 or new[1] == 7):
-            piece = Queen(position, piece.get_color())
-            flag = 1
-        target = self._board[new[1]][new[0]]
+            return 1
         piece.move_piece(new)
         self._board[position[1]][position[0]] = None
         self._board[new[1]][new[0]] = piece
@@ -269,7 +266,18 @@ class Board():
             else:
                 self.bking_position = new
         self.change_turn()
-        return flag
+        return 0
+
+    def promote_piece(self, position: tuple[int], piece_type: Piece, target: tuple[int]) -> None:
+        piece = self.get_board()[position[1]][position[0]]
+        if not isinstance(piece, Pawn):
+            return
+        piece = piece_type
+        piece.move_piece(target)
+        self.get_board()[position[1]][position[0]] = None
+        self.get_board()[target[1]][target[0]] = piece
+        self.change_turn()
+        return
 
     """
     checks if a move exists for which the current player is not in check. DOES NOT CHECK IF KING IS ALREADY IN CHECK.

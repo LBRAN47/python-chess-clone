@@ -83,7 +83,9 @@ class Controller():
         self.piece_held = None
         self.piece_held_coords = None
 
-        self.is_promotion = False
+        self.is_promotion = False #indicates whether we are in promotion selection mode
+        self.promotion_selected = None #the piece type chosen for promotion
+
         self.gui_game_loop()
         pygame.quit()
 
@@ -114,6 +116,22 @@ class Controller():
             return
         return targ_col_num, targ_row_num
 
+    """
+    takes in a set of coordinates from a pygame event, if we are not in promotion mode, return None,
+    else return the piece to be promoted to based on the position.
+    """
+    def coords_to_promotion_piece(self, pos: tuple[int]) -> Piece | None:
+        if not self.is_promotion:
+            return
+        pieces = WHITE_PROMOTION_PIECES if self.board.get_turn() == WHITE else BLACK_PROMOTION_PIECES
+        for i in range(4):
+            min_x = self.promotion_coords[0] + i*SELECT_BOX_LENGTH
+            min_y = self.promotion_coords[1]
+            max_x = min_x + SELECT_BOX_LENGTH
+            max_y = min_y + SELECT_BOX_LENGTH
+            if pos[0] >= min_x and pos[0] <= max_x and pos[1] >= min_y and pos[1] <= max_y:
+                return pieces[i]
+        return
 
 
     def terminal_game_loop(self):
@@ -171,7 +189,12 @@ class Controller():
         return
 
     def left_mouse_up_handler(self, event):
-        if not self.is_piece_held:
+        if not self.is_piece_held and self.promotion_selected is None:
+            return
+        if self.promotion_selected is not None:
+            self.board.promote_piece(self.promotion_piece_coords, self.promotion_selected, self.promotion_target_coords)
+            self.is_promotion = False
+            self.promotion_selected = None
             return
         coords = self.coords_to_square(event.pos)
         if coords is None:
@@ -182,21 +205,26 @@ class Controller():
             flag = self.board.move_piece((piece_col, piece_row), (col, row))
             if flag: #promotion
                 self.is_promotion = True
+                self.promotion_piece_coords = self.piece_held_coords
+                self.promotion_target_coords = coords
                 self.promotion_coords = event.pos
 
         self.is_piece_held = False
         self.piece_held = None
         self.piece_held_coords = None
-        print(self.board)
 
     def mouse_movement_handler(self, event):
         self.cur_mouse_x, self.cur_mouse_y = event.pos
 
 
+
     def left_mouse_handler(self, event):
-        if self.is_piece_held == True:
+        if self.is_piece_held:
             return
         x, y = event.pos
+        self.promotion_selected = self.coords_to_promotion_piece((x, y))
+        if self.promotion_selected is not None or self.is_promotion:
+            return
         coords  = self.coords_to_square(event.pos)
         if coords is None:
             return

@@ -1,4 +1,4 @@
-
+from board import *
 WHITE = True
 BLACK = False
 COLUMN_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -17,3 +17,8 @@ VALID_MOVE_RADIUS = SQUARE_LENGTH // 8
 
 SELECT_BOX_LENGTH = 50
 INNER_BOX_LENGTH = 38
+
+WHITE_PROMOTION_PIECES = [Queen((0, 0), WHITE),
+                          Rook((0, 0), WHITE), Bishop((0, 0), WHITE), Knight((0, 0), WHITE)]
+BLACK_PROMOTION_PIECES = [Queen((0, 0), BLACK),
+                          Rook((0, 0), BLACK), Bishop((0, 0), BLACK), Knight((0, 0), BLACK)]
