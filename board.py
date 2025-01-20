@@ -47,6 +47,7 @@ class Board():
             self.bking_position = (4, 7)
 
         self._turn = WHITE
+        self.enpessant_piece = None
 
     
     def get_board(self) -> list[list[Piece]]:
@@ -221,7 +222,6 @@ class Board():
                     else:
                         #print(f"cannot castle bozo")
                         return False
-                target = board.get_board()[new[1]][new[0]]
                 piece.set_position(new)
                 board.get_board()[position[1]][position[0]] = None
                 board.get_board()[new[1]][new[0]] = piece
@@ -247,6 +247,8 @@ class Board():
     """
     def move_piece(self, position: tuple[int], new: tuple[int]) -> int:
 
+        if self.enpessant_piece is not None:
+            self.enpessant_piece._just_moved = False
         piece = self.get_board()[position[1]][position[0]]
         if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
             left_rook = self.get_board()[position[1]][0]
@@ -257,6 +259,12 @@ class Board():
             return 0
         if isinstance(piece, Pawn) and (new[1] == 0 or new[1] == 7):
             return 1
+        if isinstance(piece, Pawn) and (abs(new[1] - position[1]) == 2):
+            self.enpessant_piece = piece
+        else:
+            self.enpessant_piece = None
+        if self.is_enpessant(piece, new):
+            self.get_board()[position[1]][new[0]] = None
         piece.move_piece(new)
         self._board[position[1]][position[0]] = None
         self._board[new[1]][new[0]] = piece
@@ -267,6 +275,12 @@ class Board():
                 self.bking_position = new
         self.change_turn()
         return 0
+
+    def is_enpessant(self, piece: Piece, move: tuple[int]) -> bool:
+        position = piece.get_position()
+        target = self.get_board()[move[1]][move[0]]
+        diff = (move[0] - position[0], move[1] - position[1])
+        return isinstance(piece, Pawn) and target is None and diff[0] != 0 
 
     def promote_piece(self, position: tuple[int], piece_type: Piece, target: tuple[int]) -> None:
         piece = self.get_board()[position[1]][position[0]]

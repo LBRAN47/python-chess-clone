@@ -54,6 +54,14 @@ print(board)
 
 board = Board()
 
+board.move_piece((3, 1), (3, 3))
+board.move_piece((3, 6), (3, 5))
+board.move_piece((3, 3), (3, 4))
+board.move_piece((4, 6), (4, 4))
+print(board)
+print(board.can_move_piece((3, 4), (4, 5)))
+
+board = Board()
 my_board = board.get_board()
 for row in my_board:
     for square in row:
