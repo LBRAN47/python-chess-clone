@@ -73,7 +73,6 @@ class Pawn(Piece):
 
     def can_move(self, square: tuple[int], board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
-            print("yo")
             return False
         diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
         col, row = square
@@ -85,36 +84,31 @@ class Pawn(Piece):
 
                 return False
             if diff[1] != 1 and self.has_moved():
-                print("2")
                 return False
         else:
             if diff[1] != -1 and diff[1] != -2:
-                print("3")
                 return False
             if diff[1] != -1 and self.has_moved():
-                print("4")
                 return False
         if diff[0] == 0:
             while position != square:
                 position = (position[0] + direction[0], position[1] + direction[1])
                 if board[position[1]][position[0]] is not None:
-                    print("1")
                     return False
 
         elif diff[0] == -1 or diff[0] == 1:
-            side_piece = board[row][position[0]]
-            print(side_piece.get_position())
-            if board[row][col] is None and side_piece is not None and isinstance(side_piece, Pawn) and\
-            side_piece.get_color() != self.get_color() and side_piece.has_just_moved():
+            side_piece = board[position[1]][col]
+            if self.enpessant(side_piece):
                 return True
             elif board[row][col] is None or board[row][col].get_color() == self.get_color():
-                print("yo")
                 return False
         else:
-            print("woah")
             return False
 
         return True
+    def enpessant(self, side_piece: Piece | None) -> bool:
+        return side_piece is not None and isinstance(side_piece, Pawn) and\
+                side_piece.get_color() != self.get_color() and side_piece.has_just_moved()
 
     def move_piece(self, new: tuple[int]):
         diff = (new[0] - self.get_position()[0], new[1] - self.get_position()[1])

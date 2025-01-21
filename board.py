@@ -100,6 +100,9 @@ class Board():
             ans += "|\n"
         return ans
 
+    """
+    if the player is in check, return True, else False 
+    """
     def in_check(self, player: bool, board: list[list[Piece]], position: tuple[int]) -> bool:
         for row in board:
             for square in row:
@@ -109,6 +112,9 @@ class Board():
                     return True
         return False
  
+    """
+    moves the king back to its square of origin
+    """
     def reset_king(self, king: King, origin: tuple[int]):
         self.get_board()[origin[1]][origin[0]] = king
         king.set_position(origin)
@@ -117,11 +123,15 @@ class Board():
         else:
             self.bking_position = origin
 
+
+    """
+    performs a castle provided it is possible
+    """
     def castle(self, king: King, rook: Rook) -> None:
         rook_pos = rook.get_position()
         king_pos = king.get_position()
         if rook_pos[0] == 0:
-            #long caslte
+            #long castle
             new_rook_pos = (rook_pos[0] + 3, rook_pos[1])
             new_king_pos = (king_pos[0] - 2, king_pos[1])
         elif rook_pos[0] == 7:
@@ -131,7 +141,6 @@ class Board():
         else:
             raise Exception("rook is not on its starting square\n")
             return
-        print(f"rook pos: {new_rook_pos}")
         self.get_board()[rook_pos[1]][rook_pos[0]] = None
         self.get_board()[king_pos[1]][king_pos[0]] = None
         king.move_piece(new_king_pos)
@@ -142,10 +151,11 @@ class Board():
             self.wking_postiion = new_king_pos
         else:
             self.bking_position = new_king_pos
-        print(self)
             
             
- 
+    """
+    returns True if the king can castle legally to the given position, False otherwise
+    """
     def can_castle(self, king: King, target: tuple[int]) -> bool:
         board = Board(copy.deepcopy(self.get_board()))
         if king.has_moved():
@@ -168,7 +178,6 @@ class Board():
                 return True
             #check for pieces blocking
             if board.get_board()[position[1]][position[0]] is not None:
-                #print(f"cannot castle due to piece blocking at {position}\n")
                 king.set_position(origin)
                 return False
             if iteration <= 2:
@@ -185,21 +194,16 @@ class Board():
                 if self.in_check(king.get_color(), board.get_board(), position):
                     board.get_board()[position[1]][position[0]] = None
                     king.set_position(origin)
-                    #print("got in check trying to move piece\n")
                     return False
             #shouldn't reach here but you might so check for out of bounds
             if  position[0] < 0 or position[0] > 7:
-                #print("reached the end\n")
                 king.set_position(origin)
                 return False
             iteration += 1
         return True
 
     """
-    Checks if the given move is valid.
-    Return:
-        True if move is valid
-        False if move is invalid
+    Returns True if the move is valid, False otherwise
     """
     def can_move_piece(self, position: tuple[int], new: tuple[int]) -> bool:
         board = Board(copy.deepcopy(self.get_board()))
@@ -208,11 +212,9 @@ class Board():
         board.bking_position = self.bking_position
         piece = board.get_board()[position[1]][position[0]]
         if piece is None:
-            #print("no piece at position")
             return False
         elif piece.get_color() != self.get_turn():
             color = "White" if board.get_turn() == WHITE else "Black"
-            #print(f"tried to move {piece.__class__.__name__} at {coord_to_square(position)} but it is {color}'s turn")
             return False
         else:
             if piece.can_move(new, board.get_board()):
@@ -220,7 +222,6 @@ class Board():
                     if board.can_castle(piece, new):
                         return True
                     else:
-                        #print(f"cannot castle bozo")
                         return False
                 piece.set_position(new)
                 board.get_board()[position[1]][position[0]] = None
@@ -233,16 +234,14 @@ class Board():
                 king_pos = board.wking_position if board.get_turn() == WHITE else board.bking_position
                 if board.in_check(board.get_turn(), board.get_board(), king_pos):
                     color = "White" if self._turn == WHITE else "Black"
-                    #print(f"illegal move: {color} King in check")
                     return False
                 return True
             else:
-                #print(f"illegal move: {piece.__class__.__name__} at {coord_to_square(position)} to {coord_to_square(new)}")
                 return False
         return False
 
     """
-    Moves the piece from its position to the new position (including castling). Assumes the move is valid.
+    Moves the piece from its position to the new position (including castling/promotion/enpesssant). Assumes the move is valid.
     Returns 1 if the move is a pawn promotion, 0 otherwise
     """
     def move_piece(self, position: tuple[int], new: tuple[int]) -> int:
@@ -276,12 +275,18 @@ class Board():
         self.change_turn()
         return 0
 
+    """
+    Returns True if the piece and move form a legal execution of enpessant
+    """
     def is_enpessant(self, piece: Piece, move: tuple[int]) -> bool:
         position = piece.get_position()
         target = self.get_board()[move[1]][move[0]]
         diff = (move[0] - position[0], move[1] - position[1])
         return isinstance(piece, Pawn) and target is None and diff[0] != 0 
 
+    """
+    promotes the piece at position to the piece_type and moves it to target
+    """
     def promote_piece(self, position: tuple[int], piece_type: Piece, target: tuple[int]) -> None:
         piece = self.get_board()[position[1]][position[0]]
         if not isinstance(piece, Pawn):
@@ -335,6 +340,9 @@ class Board():
 
         return ans
 
+    """
+    returns True if the current board is in stalemate
+    """
     def in_stalemate(self) -> bool:
         color =  self.get_turn()
         king_pos = self.wking_position if color == WHITE else self.bking_position
@@ -372,21 +380,23 @@ class Board():
         return ans
 
 
-
-    def get_valid_moves(self, square: tuple[int]) -> list[tuple[int]] | None:
-        col, row = square
+    """
+    returns a list of all valid squares that the piece at position can travel to
+    """
+    def get_valid_moves(self, position: tuple[int]) -> list[tuple[int]] | None:
+        col, row = position
         piece = self.get_board()[row][col]
         if piece is None:
             return
         ans = []
         for move in piece.get_valid_moves(self.get_board()):
-            if self.can_move_piece(square, move):
+            if self.can_move_piece(position, move):
                 ans.append(move)
 
 
         if isinstance(piece, King):
-            for castle_move in [(square[0] + 2, square[1]), (square[0] - 2, square[1])]:
-                if self.can_move_piece(square, castle_move):
+            for castle_move in [(position[0] + 2, position[1]), (position[0] - 2, position[1])]:
+                if self.can_move_piece(position, castle_move):
                     ans.append(castle_move)
         return ans
 

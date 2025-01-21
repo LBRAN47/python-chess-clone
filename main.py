@@ -83,7 +83,7 @@ class Controller():
     def __init__(self, board: list[list[Piece]] | None = None):
         self.window = pygame.display.set_mode((8*SQUARE_LENGTH, 8*SQUARE_LENGTH), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("CHESS")
-        self.window.fill((255, 200, 0))
+        self.window.fill((255, 255, 255))
         self.board = Board(board)
         self.view = View(self.board, self.window)
 
@@ -94,6 +94,7 @@ class Controller():
         self.is_promotion = False #indicates whether we are in promotion selection mode
         self.promotion_selected = None #the piece type chosen for promotion
 
+        #run the game loop
         self.gui_game_loop()
         pygame.quit()
 
@@ -170,12 +171,11 @@ class Controller():
             for event in pygame.event.get():
                 if event.type == pygame.WINDOWCLOSE:
                     return
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        self.left_mouse_handler(event)
-                if event.type == pygame.MOUSEMOTION:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.left_mouse_handler(event)
+                elif event.type == pygame.MOUSEMOTION:
                     self.mouse_movement_handler(event)
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.left_mouse_up_handler(event)
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
