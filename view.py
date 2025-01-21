@@ -72,3 +72,33 @@ class View():
             piece_img = pygame.transform.scale(piece_img, (INNER_BOX_LENGTH, INNER_BOX_LENGTH))
             self.window.blit(piece_img, (x, y))
 
+    def draw_game_over_screen(self, exit_code: int):
+        if exit_code not in [1, 2, 3]:
+            return
+        if exit_code == 1:
+            color = "White"
+        else:
+            color ="Black"
+        font = pygame.font.SysFont('Comic Sans MS', 30)
+        if exit_code == 3:
+            text = font.render('Stalemate!', False, (0, 0, 0))
+        else:
+            text = font.render(f'{color} Wins By Checkmate!', False, (0, 0, 0))
+        box_x = SCREEN_SIZE // 2 - text.get_width() // 2
+        box_y = SCREEN_SIZE // 2 - GAME_OVER_BOX_HEIGHT // 2
+        pygame.draw.rect(self.window, DARK_GREY, pygame.Rect(box_x, box_y, text.get_width(), GAME_OVER_BOX_HEIGHT))
+        x = box_x
+        y = box_y + text.get_height()*2
+        self.window.blit(text, (x, y)) 
+        text = font.render('Play Again', False, (0, 0, 0))
+        button_x = box_x + GAME_OVER_BOX_WIDTH // 2 - text.get_width() // 2 
+        button_y = box_y + GAME_OVER_BOX_HEIGHT // 1.5 - text.get_height() // 2 
+        pygame.draw.rect(self.window, GREY, pygame.Rect(button_x-5, button_y-2.5, text.get_width() + 10, text.get_height() + 5)) 
+        x, y = button_x, button_y
+        self.window.blit(text, (x, y))
+
+            
+
+
+
+

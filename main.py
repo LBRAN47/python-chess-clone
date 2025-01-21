@@ -84,6 +84,18 @@ class Controller():
         self.window = pygame.display.set_mode((8*SQUARE_LENGTH, 8*SQUARE_LENGTH), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("CHESS")
         self.window.fill((255, 255, 255))
+
+
+        #run the game loop
+        while True:
+            self.initialise_game(board)
+            exit_code = self.gui_game_loop()
+            self.game_over_screen(exit_code)
+            if exit_code == 0:
+                break
+        pygame.quit()
+
+    def initialise_game(self, board: list[list[Piece]] | None = None) -> None:
         self.board = Board(board)
         self.view = View(self.board, self.window)
 
@@ -94,9 +106,6 @@ class Controller():
         self.is_promotion = False #indicates whether we are in promotion selection mode
         self.promotion_selected = None #the piece type chosen for promotion
 
-        #run the game loop
-        self.gui_game_loop()
-        pygame.quit()
 
     """
     converts a set of x, y coordinates of a mouse event to coordinates on the chess board. Returns
@@ -164,13 +173,13 @@ class Controller():
             self.view.board = self.board
             time.sleep(0.1)
     
-    def gui_game_loop(self):
+    def gui_game_loop(self) -> int:
         while True:
             self.window.fill((0, 0, 0))
             self.view.update_display(self.board, self.piece_held_coords)
             for event in pygame.event.get():
                 if event.type == pygame.WINDOWCLOSE:
-                    return
+                    return 0
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.left_mouse_handler(event)
                 elif event.type == pygame.MOUSEMOTION:
@@ -179,11 +188,12 @@ class Controller():
                     self.left_mouse_up_handler(event)
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
+                        exit_code = 1 if color == "white" else 2
                         print(f"Game Over! {color} wins by checkmate!")
-                        return
+                        return exit_code
                     if self.board.in_stalemate():
                         print(f"Game Over! Stalemate!")
-                        return
+                        return 3
             
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
@@ -194,7 +204,6 @@ class Controller():
                 self.view.draw_promotion_options((self.promotion_coords), self.board.get_turn())
 
             pygame.display.flip()
-            time.sleep(0.0167)
 
         return
 
@@ -245,6 +254,10 @@ class Controller():
             self.is_piece_held = True
             self.piece_held_coords = coords
         return
+    def game_over_screen(self, exit_code: int) -> None:
+        while True:
+            self.view.draw_game_over_screen(exit_code)
+            pygame.display.flip()
             
 
 
