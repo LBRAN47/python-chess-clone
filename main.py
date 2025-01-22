@@ -254,9 +254,21 @@ class Controller():
             self.is_piece_held = True
             self.piece_held_coords = coords
         return
+
     def game_over_screen(self, exit_code: int) -> None:
+        if exit_code == 0:
+            return
         while True:
-            self.view.draw_game_over_screen(exit_code)
+            coords, width, height = self.view.draw_game_over_screen(exit_code)
+            min_x, max_x = coords[0], coords[0] + width
+            min_y, max_y = coords[1], coords[1] + height
+            for event in pygame.event.get():
+                if event.type == pygame.WINDOWCLOSE:
+                    quit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    x, y = event.pos
+                    if x >= min_x and x <= max_x and y >= min_y and y <= max_y:
+                        return
             pygame.display.flip()
             
 

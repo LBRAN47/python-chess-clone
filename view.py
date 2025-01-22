@@ -72,6 +72,10 @@ class View():
             piece_img = pygame.transform.scale(piece_img, (INNER_BOX_LENGTH, INNER_BOX_LENGTH))
             self.window.blit(piece_img, (x, y))
 
+    """
+    draws the game over screen based on exit code. Returns the coords of the play again button, and its
+    width and height
+    """
     def draw_game_over_screen(self, exit_code: int):
         if exit_code not in [1, 2, 3]:
             return
@@ -84,7 +88,7 @@ class View():
             text = font.render('Stalemate!', False, (0, 0, 0))
         else:
             text = font.render(f'{color} Wins By Checkmate!', False, (0, 0, 0))
-        box_x = SCREEN_SIZE // 2 - text.get_width() // 2
+        box_x = SCREEN_SIZE // 2 - SQUARE_LENGTH * 2
         box_y = SCREEN_SIZE // 2 - GAME_OVER_BOX_HEIGHT // 2
         pygame.draw.rect(self.window, DARK_GREY, pygame.Rect(box_x, box_y, text.get_width(), GAME_OVER_BOX_HEIGHT))
         x = box_x
@@ -96,6 +100,7 @@ class View():
         pygame.draw.rect(self.window, GREY, pygame.Rect(button_x-5, button_y-2.5, text.get_width() + 10, text.get_height() + 5)) 
         x, y = button_x, button_y
         self.window.blit(text, (x, y))
+        return (button_x - 5, button_y-2.5), text.get_width() + 10, text.get_height() + 5
 
             
 
