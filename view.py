@@ -90,8 +90,8 @@ class View():
             text = font.render(f'{color} Wins By Checkmate!', False, (0, 0, 0))
         box_x = SCREEN_SIZE // 2 - SQUARE_LENGTH * 2
         box_y = SCREEN_SIZE // 2 - GAME_OVER_BOX_HEIGHT // 2
-        pygame.draw.rect(self.window, DARK_GREY, pygame.Rect(box_x, box_y, text.get_width(), GAME_OVER_BOX_HEIGHT))
-        x = box_x
+        pygame.draw.rect(self.window, DARK_GREY, pygame.Rect(box_x, box_y, SQUARE_LENGTH * 4, GAME_OVER_BOX_HEIGHT))
+        x = SCREEN_SIZE // 2 - text.get_width() // 2
         y = box_y + text.get_height()*2
         self.window.blit(text, (x, y)) 
         text = font.render('Play Again', False, (0, 0, 0))
