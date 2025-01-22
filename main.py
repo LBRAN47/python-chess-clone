@@ -90,9 +90,9 @@ class Controller():
         while True:
             self.initialise_game(board)
             exit_code = self.gui_game_loop()
-            self.game_over_screen(exit_code)
             if exit_code == 0:
                 break
+            self.game_over_screen(exit_code)
         pygame.quit()
 
     def initialise_game(self, board: list[list[Piece]] | None = None) -> None:
@@ -204,6 +204,7 @@ class Controller():
                 self.view.draw_promotion_options((self.promotion_coords), self.board.get_turn())
 
             pygame.display.flip()
+            time.sleep(0.01)
 
         return
 
