@@ -83,7 +83,7 @@ class View():
             color = "White"
         else:
             color ="Black"
-        font = pygame.font.SysFont('Comic Sans MS', 30)
+        font = pygame.font.SysFont('Comic Sans MS', int(SQUARE_LENGTH // 2.5))
         if exit_code == 3:
             text = font.render('Stalemate!', False, (0, 0, 0))
         else:

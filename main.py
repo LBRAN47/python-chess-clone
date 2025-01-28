@@ -27,56 +27,6 @@ def interpreter(text: str) -> list[tuple[int]]:
         squares.append((col, row))
     return squares
 
-board = Board()
-print(board)
-board.move_piece((1, 1), (1, 3))
-board.move_piece((2, 6), (2, 4))
-board.move_piece((2, 4), (1, 3))
-board.move_piece((1, 3), (1, 2))
-board.move_piece((1, 2), (1, 1))
-board.move_piece((1, 1), (0, 0))
-print(board)
-
-board = Board()
-
-board.move_piece((3, 1), (3, 3))
-board.move_piece((2, 0), (5, 3))
-board.move_piece((4, 1), (4, 2))
-board.move_piece((4, 6), (4, 4))
-board.move_piece((5, 3), (4, 4))
-board.move_piece((4, 4), (3, 3))
-board.move_piece((5, 0), (3, 2))
-board.move_piece((5, 7), (3, 5))
-board.move_piece((3, 5), (2, 6))
-
-
-print(board)
-
-board = Board()
-
-board.move_piece((3, 1), (3, 3))
-board.move_piece((3, 6), (3, 5))
-board.move_piece((3, 3), (3, 4))
-board.move_piece((4, 6), (4, 4))
-print(board)
-print(board.can_move_piece((3, 4), (4, 5)))
-
-board = Board()
-my_board = board.get_board()
-for row in my_board:
-    for square in row:
-        if square is None:
-            continue
-        print(f"Piece: {square}, position: {square.get_position()}\nPossible Moves: {square.get_valid_moves(my_board)}")
-
-
-
-
-
-print("=====================")
-print("new game")
-print("=====================")
-
 
 class Controller():
 
@@ -150,28 +100,6 @@ class Controller():
             if pos[0] >= min_x and pos[0] <= max_x and pos[1] >= min_y and pos[1] <= max_y:
                 return pieces[i]
         return
-
-
-    def terminal_game_loop(self):
-        while True:
-            move = input("enter 4 characters representing the move e.g. e2e4\n")
-            move = interpreter(move)
-            if move is None:
-                continue
-            pos, target = move
-            if self.board.can_move_piece(pos, target):
-                self.board.move_piece(pos, target)
-            print(self.board)
-            if self.board.in_checkmate():
-                color = "white" if self.board.get_turn() != WHITE else "black"
-                print(f"Game Over! {color} wins by checkmate!")
-                break
-            if self.board.in_stalemate():
-                print(f"Game Over! Stalemate!")
-                break
-            self.view.update_display(self.board.get_board())
-            self.view.board = self.board
-            time.sleep(0.1)
     
     def gui_game_loop(self) -> int:
         while True:
@@ -179,7 +107,7 @@ class Controller():
             self.view.update_display(self.board, self.piece_held_coords)
             for event in pygame.event.get():
                 if event.type == pygame.WINDOWCLOSE:
-                    return 0
+                    return END_GAME
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.left_mouse_handler(event)
                 elif event.type == pygame.MOUSEMOTION:
@@ -188,12 +116,12 @@ class Controller():
                     self.left_mouse_up_handler(event)
                     if self.board.in_checkmate():
                         color = "white" if self.board.get_turn() != WHITE else "black"
-                        exit_code = 1 if color == "white" else 2
+                        exit_code = WHITE_CHECKMATE if color == "white" else BLACK_CHECKMATE
                         print(f"Game Over! {color} wins by checkmate!")
                         return exit_code
                     if self.board.in_stalemate():
                         print(f"Game Over! Stalemate!")
-                        return 3
+                        return STALEMATE
             
             if self.is_piece_held:
                 x = self.cur_mouse_x - (SQUARE_LENGTH // 2)
