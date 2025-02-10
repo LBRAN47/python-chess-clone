@@ -1,5 +1,5 @@
-from constants import *
-from pieces import *
+from pieces import Piece, Pawn, Bishop, Knight, Rook, Queen, King
+from constants import COLUMN_LETTERS, COLUMNS, WHITE, BLACK
 import copy
 
 def coord_to_square(coord: tuple[int]) -> str | None:
@@ -115,7 +115,9 @@ class Board():
     """
     moves the king back to its square of origin
     """
-    def reset_king(self, king: King, origin: tuple[int]):
+    def reset_king(self, king: King, origin: tuple[int, int]):
+        if len(origin) != 2:
+            return
         self.get_board()[origin[1]][origin[0]] = king
         king.set_position(origin)
         if king.get_color() == WHITE:
