@@ -2,15 +2,15 @@ from pieces import Pawn, Bishop, Rook, Queen, King, Knight
 from constants import *
 from board import *
 from view import *
-
 import pygame
 import time
+
 
 """
 takes in the input of the user, which must be in the form "charintcharint" e.g. "d4e5".
 returns a list of two tuples, the coordinates of the piece to move, and the target square.
 """
-def interpreter(text: str) -> list[tuple[int]]:
+def interpreter(text: str) -> list[tuple[int]] | None:
     
     if len(text) != 4:
         print("text must be of length 4\n")
