@@ -1,3 +1,4 @@
+type Coordinate = tuple[int, int]
 WHITE = True
 BLACK = False
 COLUMN_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']

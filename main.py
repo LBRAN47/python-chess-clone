@@ -1,6 +1,6 @@
 from constants import (COLUMNS, SQUARE_LENGTH, BOARD_POSITION,
                 SELECT_BOX_LENGTH, WHITE, END_GAME, WHITE_CHECKMATE,
-                BLACK_CHECKMATE, STALEMATE)
+                BLACK_CHECKMATE, STALEMATE, Coordinate)
 from pieces import Piece
 from board import Board
 from view import View, WHITE_PROMOTION_PIECES, BLACK_PROMOTION_PIECES
@@ -108,7 +108,7 @@ class Controller():
              is returned.
     """
     def coords_to_square(self,
-                         coords: tuple[int, int]) -> tuple[int, int] | None:
+                         coords: Coordinate) -> Coordinate | None:
         targ_x, targ_y = coords
         x, y = BOARD_POSITION
         targ_row_num = None
@@ -136,7 +136,7 @@ class Controller():
     promotion mode, return None, else return the piece to be promoted to based
     on the position.
     """
-    def coords_to_promotion_piece(self, coords: tuple[int, int]) -> Piece | None:
+    def coords_to_promotion_piece(self, coords: Coordinate) -> Piece | None:
         if not self.is_promotion:
             return
         pieces = (WHITE_PROMOTION_PIECES

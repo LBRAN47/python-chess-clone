@@ -2,7 +2,8 @@
 from constants import (BOARD_POSITION, COLORS, INNER_BOX_LENGTH,
                        SELECT_BOX_LENGTH, SQUARE_LENGTH, GREY,
                        VALID_MOVE_RADIUS, BLACK, WHITE, DARK_GREY,
-                       GAME_OVER_BOX_WIDTH, GAME_OVER_BOX_HEIGHT, SCREEN_SIZE)
+                       GAME_OVER_BOX_WIDTH, GAME_OVER_BOX_HEIGHT, SCREEN_SIZE,
+                       Coordinate)
 
 
 from board import Board
@@ -45,7 +46,7 @@ class View():
     """
     def draw_board(self,
                    model: Board,
-                   piece_selected: tuple[int, int] | None = None) -> None:
+                   piece_selected: Coordinate | None = None) -> None:
         
         board = model.get_board()
         #the top left corner of the board is defined by BOARD_POSITION
@@ -79,7 +80,7 @@ class View():
     args:
         moves : a list of board coordinates.
     """
-    def draw_valid_moves(self, moves: list[tuple[int, int]]):
+    def draw_valid_moves(self, moves: list[Coordinate]):
         if moves is None:
             return
         for move in moves:
@@ -95,7 +96,7 @@ class View():
         pos : the x,y coordinates on the window to start drawing the box
         color : WHITE or BLACK, represents which color is promoting
     """
-    def draw_promotion_options(self, pos: tuple[int, int], color: bool) -> None:
+    def draw_promotion_options(self, pos: Coordinate, color: bool) -> None:
 
         pieces = (WHITE_PROMOTION_PIECES 
                   if color == WHITE

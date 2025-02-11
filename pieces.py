@@ -1,11 +1,10 @@
 from abc import abstractmethod
 from typing import override
+from constants import (WHITE, BLACK, Coordinate)
 
-WHITE = True
-BLACK = False
 class Piece():
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         for coord in position:
             if coord < 0  or coord > 7:
                 raise Exception(f"{self.__class__.__name__} must be in the board") 
@@ -14,17 +13,16 @@ class Piece():
         
 
 
-    def get_position(self) -> tuple[int, int]:
+    def get_position(self) -> Coordinate:
         return self._position
 
     def get_color(self) -> bool:
         return self._color
     
-    def set_position(self, position: tuple[int, int]):
+    def set_position(self, position: Coordinate):
         self._position = position
 
-    @abstractmethod
-    def can_move(self, square: tuple[int, int], board) -> bool:
+    def can_move(self, square: Coordinate, board) -> bool:
         if self.get_position() == square:
             return False
         for coord in square:
@@ -36,7 +34,7 @@ class Piece():
         return True
 
 
-    def get_delta(self, diff: tuple[int, int]) -> tuple[int, int]:
+    def get_delta(self, diff: Coordinate) -> Coordinate:
         dx = 0 if diff[0] == 0 else (1 if diff[0] > 0 else -1)
         dy = 0 if diff[1] == 0 else (1 if diff[1] > 0 else -1)
         return (dx, dy)
@@ -48,12 +46,16 @@ class Piece():
         col = "B" if self.get_color() == BLACK else "W"
         return str(self) + col + ".png"
 
-    def move_piece(self, new: tuple[int, int]):
+    def move_piece(self, new: Coordinate):
         self._position = new
 
+    @abstractmethod
+    def get_valid_moves(self, board) -> list[Coordinate]:
+        pass
+    
 class Pawn(Piece):
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
 
         super().__init__(position, color)
         self._has_moved = False
@@ -72,7 +74,8 @@ class Pawn(Piece):
     def has_just_moved(self) -> bool:
         return self._just_moved
 
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
@@ -113,14 +116,15 @@ class Pawn(Piece):
                 side_piece.get_color() != self.get_color() and side_piece.has_just_moved()
 
     @override
-    def move_piece(self, new: tuple[int, int]):
+    def move_piece(self, new: Coordinate):
         diff = (new[0] - self.get_position()[0], new[1] - self.get_position()[1])
         self._position = new
         if not self._has_moved and abs(diff[1]) == 2:
             self._just_moved = True
         self._has_moved = True
     
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         ans = []
         pos = self.get_position()
         if self.get_color() == WHITE:
@@ -141,11 +145,12 @@ class Pawn(Piece):
 
 class Bishop(Piece):
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         super().__init__(position, color)
 
 
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
@@ -164,7 +169,8 @@ class Bishop(Piece):
             return False
         return True
 
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         ans = []
         moves = []
         pos = self.get_position()
@@ -184,14 +190,15 @@ class Bishop(Piece):
 
 class Rook(Piece):
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         super().__init__(position, color)
         self._has_moved = False
 
     def has_moved(self) -> bool:
         return self._has_moved
 
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0],  square[1] - self.get_position()[1])
@@ -210,7 +217,8 @@ class Rook(Piece):
             return False
         return True
 
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         ans = []
         moves = []
         pos = self.get_position()
@@ -228,13 +236,14 @@ class Rook(Piece):
 
 class Queen(Piece):
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         super().__init__(position, color)
         self.rook = Rook(position, color)
         self.bishop = Bishop(position, color)
         self._position = position
 
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         if self.rook.can_move(square, board) or self.bishop.can_move(square, board):
@@ -242,18 +251,19 @@ class Queen(Piece):
         return False
 
     @override
-    def move_piece(self, new: tuple[int, int]):
+    def move_piece(self, new: Coordinate):
         self.rook._position = new
         self.bishop._position = new
         self._position = new
 
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         return self.rook.get_valid_moves(board) + self.bishop.get_valid_moves(board)
     
  
 class King(Piece):
 
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         if color == WHITE and position != (4, 0):
             self._has_moved = True
         elif color == BLACK and position != (4, 7):
@@ -265,7 +275,8 @@ class King(Piece):
     def has_moved(self) -> bool:
         return self._has_moved
 
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         diff = (square[0] - self.get_position()[0], square[1] - self.get_position()[1])
@@ -291,11 +302,12 @@ class King(Piece):
 
 
     @override
-    def move_piece(self, new: tuple[int, int]) -> None:
+    def move_piece(self, new: Coordinate) -> None:
         self._position = new
         self._has_moved = True
 
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         ans = []
         for direction in [(0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0), (0, -1), (1, -1), (-1, -1)]:
             pos = tuple(a + b for a, b in zip(self.get_position(), direction))
@@ -309,16 +321,18 @@ class King(Piece):
 class Knight(Piece):
 
     
-    def __init__(self, position: tuple[int, int], color: bool):
+    def __init__(self, position: Coordinate, color: bool):
         super().__init__(position, color)
-
-    def can_move(self, square: tuple[int, int], board: list[list[Piece]]) -> bool:
+    
+    @override
+    def can_move(self, square: Coordinate, board: list[list[Piece]]) -> bool:
         if not super().can_move(square, board):
             return False
         diff = (abs(square[0] - self.get_position()[0]), abs(square[1] - self.get_position()[1]))
         return (diff[0] == 2 and diff[1] == 1) or (diff[0] == 1 and diff[1] == 2)
     
-    def get_valid_moves(self, board: list[list[Piece]]) -> list[tuple[int, int]]:
+    @override
+    def get_valid_moves(self, board: list[list[Piece]]) -> list[Coordinate]:
         ans = []
         for direction in [(-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1)]:
             pos = tuple(a + b for a, b in zip(self.get_position(), direction))
@@ -326,6 +340,7 @@ class Knight(Piece):
                 ans.append(pos)
         return ans
 
+    @override
     def __str__(self) -> str:
         return "N"
 
