@@ -1,4 +1,3 @@
-from board import *
 WHITE = True
 BLACK = False
 COLUMN_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -23,10 +22,6 @@ GAME_OVER_BOX_HEIGHT = 3*SQUARE_LENGTH
 GAME_OVER_BUTTON_WIDTH = 2*SQUARE_LENGTH
 GAME_OVER_BUTTON_HEIGHT = SQUARE_LENGTH // 1.5
 
-WHITE_PROMOTION_PIECES = [Queen((0, 0), WHITE),
-                          Rook((0, 0), WHITE), Bishop((0, 0), WHITE), Knight((0, 0), WHITE)]
-BLACK_PROMOTION_PIECES = [Queen((0, 0), BLACK),
-                          Rook((0, 0), BLACK), Bishop((0, 0), BLACK), Knight((0, 0), BLACK)]
 END_GAME = 0
 WHITE_CHECKMATE = 1
 BLACK_CHECKMATE = 2

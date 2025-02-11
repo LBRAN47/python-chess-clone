@@ -2,7 +2,7 @@ from pieces import Piece, Pawn, Bishop, Knight, Rook, Queen, King
 from constants import COLUMN_LETTERS, COLUMNS, WHITE, BLACK
 import copy
 
-def coord_to_square(coord: tuple[int]) -> str | None:
+def coord_to_square(coord: tuple[int, int]) -> str | None:
     if len(coord) != 2:
         print("coord must be a coordinate\n")
         return None
@@ -17,7 +17,7 @@ def coord_to_square(coord: tuple[int]) -> str | None:
 
 class Board():
 
-    def __init__(self, board: list[list[Piece]] | None = None):
+    def __init__(self, board: list[list[Piece | None]] | None = None):
         if board is not None:
             if len(board) != 8:
                 raise Exception("board must have 8 rows")
@@ -50,7 +50,7 @@ class Board():
         self.enpessant_piece = None
 
     
-    def get_board(self) -> list[list[Piece]]:
+    def get_board(self) -> list[list[Piece | None]]:
         return self._board
 
     def get_turn(self) -> bool:
@@ -60,7 +60,7 @@ class Board():
         self._turn = WHITE if self._turn == BLACK else BLACK
 
 
-    def construct_board(self) -> list[list[Piece]]:
+    def construct_board(self) -> list[list[Piece | None]]:
         board = []
         for i in range(0, 8):
             row = []
@@ -103,7 +103,7 @@ class Board():
     """
     if the player is in check, return True, else False 
     """
-    def in_check(self, player: bool, board: list[list[Piece]], position: tuple[int]) -> bool:
+    def in_check(self, player: bool, board: list[list[Piece | None]], position: tuple[int, int]) -> bool:
         for row in board:
             for square in row:
                 if square is None:
@@ -158,7 +158,7 @@ class Board():
     """
     returns True if the king can castle legally to the given position, False otherwise
     """
-    def can_castle(self, king: King, target: tuple[int]) -> bool:
+    def can_castle(self, king: King, target: tuple[int, int]) -> bool:
         board = Board(copy.deepcopy(self.get_board()))
         if king.has_moved():
             return False
@@ -207,7 +207,7 @@ class Board():
     """
     Returns True if the move is valid, False otherwise
     """
-    def can_move_piece(self, position: tuple[int], new: tuple[int]) -> bool:
+    def can_move_piece(self, position: tuple[int, int], new: tuple[int, int]) -> bool:
         board = Board(copy.deepcopy(self.get_board()))
         board._turn = self.get_turn()
         board.wking_position = self.wking_position
@@ -216,7 +216,6 @@ class Board():
         if piece is None:
             return False
         elif piece.get_color() != self.get_turn():
-            color = "White" if board.get_turn() == WHITE else "Black"
             return False
         else:
             if piece.can_move(new, board.get_board()):
@@ -235,22 +234,22 @@ class Board():
                         board.bking_position = new
                 king_pos = board.wking_position if board.get_turn() == WHITE else board.bking_position
                 if board.in_check(board.get_turn(), board.get_board(), king_pos):
-                    color = "White" if self._turn == WHITE else "Black"
                     return False
                 return True
             else:
                 return False
-        return False
 
     """
     Moves the piece from its position to the new position (including castling/promotion/enpesssant). Assumes the move is valid.
     Returns 1 if the move is a pawn promotion, 0 otherwise
     """
-    def move_piece(self, position: tuple[int], new: tuple[int]) -> int:
+    def move_piece(self, position: tuple[int, int], new: tuple[int, int]) -> int:
 
         if self.enpessant_piece is not None:
             self.enpessant_piece._just_moved = False
         piece = self.get_board()[position[1]][position[0]]
+        if piece is None:
+            return 0
         if isinstance(piece, King) and abs(position[0] - new[0]) == 2 and position[1] - new[1] == 0:
             left_rook = self.get_board()[position[1]][0]
             right_rook = self.get_board()[position[1]][7]
@@ -280,7 +279,7 @@ class Board():
     """
     Returns True if the piece and move form a legal execution of enpessant
     """
-    def is_enpessant(self, piece: Piece, move: tuple[int]) -> bool:
+    def is_enpessant(self, piece: Piece, move: tuple[int, int]) -> bool:
         position = piece.get_position()
         target = self.get_board()[move[1]][move[0]]
         diff = (move[0] - position[0], move[1] - position[1])
@@ -289,7 +288,7 @@ class Board():
     """
     promotes the piece at position to the piece_type and moves it to target
     """
-    def promote_piece(self, position: tuple[int], piece_type: Piece, target: tuple[int]) -> None:
+    def promote_piece(self, position: tuple[int, int], piece_type: Piece, target: tuple[int, int]) -> None:
         piece = self.get_board()[position[1]][position[0]]
         if not isinstance(piece, Pawn):
             return
@@ -385,7 +384,7 @@ class Board():
     """
     returns a list of all valid squares that the piece at position can travel to
     """
-    def get_valid_moves(self, position: tuple[int]) -> list[tuple[int]] | None:
+    def get_valid_moves(self, position: tuple[int, int]) -> list[tuple[int, int]] | None:
         col, row = position
         piece = self.get_board()[row][col]
         if piece is None:

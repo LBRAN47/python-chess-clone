@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import override
 
-BLACK = False
 WHITE = True
+BLACK = False
 class Piece():
 
     def __init__(self, position: tuple[int, int], color: bool):
@@ -34,6 +34,7 @@ class Piece():
         if board[row][col] is not None and board[row][col].get_color() == self.get_color():
             return False
         return True
+
 
     def get_delta(self, diff: tuple[int, int]) -> tuple[int, int]:
         dx = 0 if diff[0] == 0 else (1 if diff[0] > 0 else -1)
@@ -273,17 +274,17 @@ class King(Piece):
             return True
         return not(abs(diff[0]) > 1 or abs(diff[1]) > 1)
 
-    def castle(self, rook: Rook, board: list[list[Piece]]):
+    def castle(self, rook: Rook, board: list[list[Piece | None]]):
         #move rook
         rook_x, rook_y = rook.get_position()
-        new_x = 3 if x_pos == 0 else 5
+        new_x = 3 if rook_x == 0 else 5
         board[rook_y][rook_x] = None
         board[rook_y][new_x] = rook
         rook.set_position((new_x, rook_y))
         
         #move king
         king_x, king_y = self.get_position()
-        new_x = 2 if x_pos == 0 else 6
+        new_x = 2 if king_x == 0 else 6
         board[king_y][king_x] = None
         board[king_y][new_x] = self
         self.move_piece((new_x, king_y))
