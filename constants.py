@@ -1,8 +1,21 @@
+# A coordinate in the window, representing an x and y position.
 type Coordinate = tuple[int, int]
+# A coordinate in the board, representing a 0-indexed collum and row position.
+type BoardCoordinate = tuple[int, int]
+
+# boolean representations of the WHITE and BLACK players
 WHITE = True
 BLACK = False
+#mapping of collumn letters typical in chess noation to a 0-indexed collumn number.
 COLUMN_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-COLUMNS = {"a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6, "h" : 7}
+COLUMNS = {"a" : 0, "b" : 1, "c" : 2, "d" : 3,
+           "e" : 4, "f" : 5, "g" : 6, "h" : 7}
+
+# the Exit Codes for the game loop
+END_GAME = 0
+WHITE_CHECKMATE = 1
+BLACK_CHECKMATE = 2
+STALEMATE = 3
 
 
 GREEN = (119, 149, 86)
@@ -23,7 +36,3 @@ GAME_OVER_BOX_HEIGHT = 3*SQUARE_LENGTH
 GAME_OVER_BUTTON_WIDTH = 2*SQUARE_LENGTH
 GAME_OVER_BUTTON_HEIGHT = SQUARE_LENGTH // 1.5
 
-END_GAME = 0
-WHITE_CHECKMATE = 1
-BLACK_CHECKMATE = 2
-STALEMATE = 3

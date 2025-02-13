@@ -1,16 +1,17 @@
 from pieces import Piece, Pawn, Bishop, Knight, Rook, Queen, King
-from constants import COLUMN_LETTERS, COLUMNS, WHITE, BLACK, Coordinate
+from constants import (COLUMN_LETTERS, COLUMNS, WHITE, BLACK, Coordinate,
+                       BoardCoordinate)
 import copy
 
 """
-converts a coordinate pair representing a square on the board to a string
+converts a BoardCoordinate representing a square on the board to a string
 representing the typical chess notation for a square, where the collumn
 is represented by a letter from a-h and the row by a number from 1-8.
 args : 
     coords : a coordinate pair representing a collumn and row in the chess
              board.
 """
-def coord_to_square(coords: Coordinate) -> str | None:
+def coord_to_square(coords: BoardCoordinate) -> str | None:
     if len(coords) != 2:
         print("coord must be a coordinate\n")
         return None
@@ -34,7 +35,7 @@ class Board():
 
     """
     Sets up the board for the start of a chess game. If a custom board is
-    provided, it checked for legality. A board is considered legal if:
+    provided, it is checked for legality. A board is considered legal if:
         1. it has 8 rows and 8 collumns (i.e. it is a list containing 8
            8-element lists)
         2. it has exactly one white king and one black king
@@ -83,7 +84,7 @@ class Board():
 
     
     """
-    Get method for the board.
+    Returns the board representation.
     """
     def get_board(self) -> list[list[Piece | None]]:
         return self._board
@@ -172,12 +173,15 @@ class Board():
 
     """
     if the player is in check, return True, else False 
-    
+    args:
+        player: WHITE or BLACK, selects which player is to be checked
+        board: A 2D list represetning a board state.
+        position: The BoardCoordinate of the king to be checked.
     """
     def in_check(self,
                  player: bool,
                  board: list[list[Piece | None]],
-                 position: Coordinate) -> bool:
+                 position: BoardCoordinate) -> bool:
 
         for row in board:
             for square in row:
@@ -190,8 +194,11 @@ class Board():
  
     """
     moves the king to the specified origin square
+    args:
+        king : a King object instance to be moved
+        origin : a board coordinate of where to move the king.
     """
-    def reset_king(self, king: King, origin: Coordinate):
+    def reset_king(self, king: King, origin: BoardCoordinate):
         if len(origin) != 2:
             return
         self.get_board()[origin[1]][origin[0]] = king
@@ -203,7 +210,10 @@ class Board():
 
 
     """
-    performs a castle provided it is possible
+    performs a castle move on the board. Assumes castling is legal (see can_castle)
+    args:
+        king : a King object instance to be moved
+        rook : the Rook object instance to be moved
     """
     def castle(self, king: King, rook: Rook) -> None:
         rook_pos = rook.get_position()
@@ -218,7 +228,6 @@ class Board():
             new_king_pos = (king_pos[0] + 2, king_pos[1])
         else:
             raise Exception("rook is not on its starting square\n")
-            return
         self.get_board()[rook_pos[1]][rook_pos[0]] = None
         self.get_board()[king_pos[1]][king_pos[0]] = None
         king.move_piece(new_king_pos)
@@ -232,9 +241,13 @@ class Board():
             
             
     """
-    returns True if the king can castle legally to the given position, False otherwise
+    returns True if the king can castle legally to the given position,
+    False otherwise
+    args:
+        king : a King object instance to be moved
+        target : The board coordinate which the king will move to
     """
-    def can_castle(self, king: King, target: Coordinate) -> bool:
+    def can_castle(self, king: King, target: BoardCoordinate) -> bool:
         board = Board(copy.deepcopy(self.get_board()))
         if king.has_moved():
             return False
@@ -282,11 +295,14 @@ class Board():
             iteration += 1
 
     """
-    Returns True if the move is valid, False otherwise
+    Returns True if the move is legal for this board, False otherwise
+    args:
+        position : a board Coordinate of the piece to be moved
+        new : a board Coordinate for the piece to move to
     """
     def can_move_piece(self,
-                       position: Coordinate,
-                       new: Coordinate) -> bool:
+                       position: BoardCoordinate,
+                       new: BoardCoordinate) -> bool:
 
         board = Board(copy.deepcopy(self.get_board()))
         board._turn = self.get_turn()
@@ -326,12 +342,16 @@ class Board():
                 return False
 
     """
-    Moves the piece from its position to the new position (including castling/promotion/enpesssant). Assumes the move is valid.
-    Returns 1 if the move is a pawn promotion, 0 otherwise
+    Moves the piece from its position to the new position (including
+    castling/promotion/enpesssant). Assumes the move is valid (see
+    can_move_piece). Returns 1 if the move is a pawn promotion, 0 otherwise.
+    args :
+        position : a board Coordinate of the piece to be moved
+        new : a board Coordinate for the piece to move to
     """
     def move_piece(self,
-                   position: Coordinate,
-                   new: Coordinate) -> int:
+                   position: BoardCoordinate,
+                   new: BoardCoordinate) -> int:
 
         if self.enpessant_piece is not None:
             self.enpessant_piece._just_moved = False
@@ -354,7 +374,7 @@ class Board():
             self.enpessant_piece = piece
         else:
             self.enpessant_piece = None
-        if self.is_enpessant(piece, new):
+        if isinstance(piece, Pawn) and self.is_enpessant(piece, new):
             self.get_board()[position[1]][new[0]] = None
         piece.move_piece(new)
         self._board[position[1]][position[0]] = None
@@ -369,20 +389,28 @@ class Board():
 
     """
     Returns True if the piece and move form a legal execution of enpessant
+    args :
+        piece : a Pawn object instance which is to be moved
+        move : the board coordinate for the pawn to move to
     """
-    def is_enpessant(self, piece: Piece, move: Coordinate) -> bool:
+    def is_enpessant(self, piece: Pawn, move: BoardCoordinate) -> bool:
         position = piece.get_position()
         target = self.get_board()[move[1]][move[0]]
         diff = (move[0] - position[0], move[1] - position[1])
-        return isinstance(piece, Pawn) and target is None and diff[0] != 0 
+        return target is None and diff[0] != 0 
 
     """
-    promotes the piece at position to the piece_type and moves it to target
+    swaps the piece at position to the piece_type and moves it to the target
+    args :
+        position : the board coordinates of the piece to be moved.
+        piece_type : an instance of the object for the piece to be reassigned.
+        target : the board coordinates where the piece will move to.
+    
     """
     def promote_piece(self,
-                      position: Coordinate,
+                      position: BoardCoordinate,
                       piece_type: Piece,
-                      target: Coordinate) -> None:
+                      target: BoardCoordinate) -> None:
         piece = self.get_board()[position[1]][position[0]]
         if not isinstance(piece, Pawn):
             return
@@ -393,6 +421,14 @@ class Board():
         self.change_turn()
         return
     
+    """
+    If the player of the given color has at least one legal move available to
+    them, returns True, else returns False. If True is returned, the player is
+    either in Checkmate or Stalemate.
+    args :
+        board : a 2D list representing a chess board
+        color : WHITE or BLACK, the player to check for legal moves.
+    """
     def does_legal_move_exist(self, board: list[list[Piece | None]], color: bool) -> bool:
         ans = True
         for row in board:
@@ -426,10 +462,11 @@ class Board():
         return ans
 
     """
-    checks if a move exists for which the current player is not in check. DOES NOT CHECK IF KING IS ALREADY IN CHECK.
-    Returns:
-        False if there exists a move for which the player is not in check
-        True if no such move exists
+    checks if the player who's turn it currently is is in checkmate. A player
+    is in checkmate if they:
+        1. Have no legal moves available to them.
+        2. Are in check
+    returns True if they are in checkmate, False otherwise.
     """
     def in_checkmate(self) -> bool:
         color =  self.get_turn()
@@ -443,7 +480,11 @@ class Board():
 
     
     """
-    returns True if the current board is in stalemate
+    Checks if the player for who's turn it currently is is in stalemate. A
+    player is in stalemate if they are:
+        1. Have no legal moves available to them
+        2. Are not in check
+    returns True if they are in stalemate, False otherwise.
     """
     def in_stalemate(self) -> bool:
         color =  self.get_turn()
@@ -457,10 +498,13 @@ class Board():
 
 
     """
-    returns a list of all valid squares that the piece at position can travel to
+    returns a list of all valid board coordinates that the piece at position
+    can legally move to.
+    args:
+        position : the board coordinates of the piece
     """
     def get_valid_moves(self,
-                position: Coordinate) -> list[Coordinate] | None:
+                position: BoardCoordinate) -> list[BoardCoordinate] | None:
         col, row = position
         piece = self.get_board()[row][col]
         if piece is None:
