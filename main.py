@@ -1,6 +1,6 @@
 from constants import (COLUMNS, SQUARE_LENGTH, BOARD_POSITION,
                 SELECT_BOX_LENGTH, WHITE, END_GAME, WHITE_CHECKMATE,
-                BLACK_CHECKMATE, STALEMATE, Coordinate)
+                BLACK_CHECKMATE, STALEMATE, Coordinate, BoardCoordinate)
 from pieces import Piece
 from board import Board
 from view import View, WHITE_PROMOTION_PIECES, BLACK_PROMOTION_PIECES
@@ -9,13 +9,14 @@ import time
 
 
 
-"""
-takes in the input of the user, which must be in the form "charintcharint" e.g.
-"d4e5". Returns a list of two tuples, the coordinates of the piece to move,
-and the target square.
+def interpreter(text: str) -> list[BoardCoordinate] | None:
+    """Converts text into a set of BoardCordinates.
 
-"""
-def interpreter(text: str) -> list[tuple[int]] | None:
+    Args:
+        text (str): two squares on the chess board representing the move e.g. "d4e5"
+    Returns:
+        list[BoardCoordinate]: two BoardCoordinates, one for the starting square and one for the ending square.
+    """
     
     if len(text) != 4:
         print("text must be of length 4\n")
@@ -327,5 +328,6 @@ class Controller():
             pygame.display.flip()
             
 
-if __name__ == "__main__":
+
+def main():
     Controller()

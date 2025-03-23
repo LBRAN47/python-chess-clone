@@ -17,6 +17,7 @@ WHITE_PROMOTION_PIECES = [Queen((0, 0), WHITE), Rook((0, 0), WHITE),
                           Bishop((0, 0), WHITE), Knight((0, 0), WHITE)]
 BLACK_PROMOTION_PIECES = [Queen((0, 0), BLACK), Rook((0, 0), BLACK),
                           Bishop((0, 0), BLACK), Knight((0, 0), BLACK)]
+directory = os.path.dirname(os.path.abspath(__file__))
 ###############################################################################
 
 pygame.init()
@@ -46,7 +47,7 @@ class View():
     """
     def draw_board(self,
                    model: Board,
-                   piece_selected: Coordinate | None = None) -> None:
+                   piece_selected: tuple[int, int] | None = None) -> None:
         
         board = model.get_board()
         #the top left corner of the board is defined by BOARD_POSITION
@@ -59,7 +60,7 @@ class View():
                 pygame.draw.rect(self.window, COLORS[counter%2], rectangle)
                 if board[row][col] is not None:
                     piece_img = pygame.image.load(
-                            os.path.join("PIECES",
+                            os.path.join(directory, "PIECES",
                             board[row][col].get_filename())).convert_alpha()
                     piece_img = pygame.transform.scale(piece_img,
                                             (SQUARE_LENGTH, SQUARE_LENGTH))
@@ -80,7 +81,7 @@ class View():
     args:
         moves : a list of board coordinates.
     """
-    def draw_valid_moves(self, moves: list[Coordinate]):
+    def draw_valid_moves(self, moves: list[tuple[int, int]]):
         if moves is None:
             return
         for move in moves:
@@ -96,7 +97,7 @@ class View():
         pos : the x,y coordinates on the window to start drawing the box
         color : WHITE or BLACK, represents which color is promoting
     """
-    def draw_promotion_options(self, pos: Coordinate, color: bool) -> None:
+    def draw_promotion_options(self, pos: tuple[int, int], color: bool) -> None:
 
         pieces = (WHITE_PROMOTION_PIECES 
                   if color == WHITE
